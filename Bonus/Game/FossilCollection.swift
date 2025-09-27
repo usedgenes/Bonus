@@ -14,6 +14,7 @@ class FossilCollection: ObservableObject {
             save()
         }
     }
+    @Published var hasShownCongrats: Bool = false
 
     init(fossils: [Fossil]) {
         self.fossils = fossils
