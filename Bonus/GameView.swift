@@ -1,23 +1,24 @@
 //
-//  CollectionBookView.swift
+//  GameView.swift
 //  Bonus
 //
 //  Created by Eugene on 9/26/25.
 //
+
 import SwiftUI
 
-struct CollectionBookView: View {
+struct GameView: View {
     @State private var counter = 0
-
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("Hello, SwiftUI!")
                 .font(.largeTitle)
                 .foregroundColor(.blue)
-
+            
             Text("Counter: \(counter)")
                 .font(.title2)
-
+            
             Button(action: {
                 counter += 1
             }) {
@@ -27,14 +28,25 @@ struct CollectionBookView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
+            HStack {
+                NavigationLink {
+                    CollectionBookView()
+                } label: {
+                    Text("Collection Book")
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                }
+                Spacer()
+            }
         }
         .padding()
+
     }
 }
 
-struct CollectionBookView_Preview: PreviewProvider {
+struct GameView_Previews: PreviewProvider {
     static var previews: some View {
-        BudgetView()
+        GameView()
     }
 }
 
