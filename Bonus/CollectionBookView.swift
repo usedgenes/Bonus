@@ -32,26 +32,26 @@ struct CollectionBookView: View {
                 }
                 
                 // Main image
-                if fossilCollection.foundCount >= 18 {
-                    Image("fullDinosaur")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
-                } else {
-                    Image("fullDinosaur")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
-                        .blur(radius: blurAmount)
-                    /*
-                    Image("leftArm")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)*/
-                }
+
+                    if fossilCollection.foundCount >= 18 {
+                        Image("fullDinosaur")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                    } else {
+                        ZStack {
+                            Image("fullDinosaur")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                                .blur(radius: blurAmount)
+                            
+                            Text("Discover all fossils to unlock the dinosaur!")
+                        }
+                    }
                 
                 // Fossil count
-                Text("Brachiosaurus Fossils (\(fossilCollection.foundCount)/18)")
+                Text("Ceratosaurus Fossils (\(fossilCollection.foundCount)/18)")
                     .font(.title2)
                     .foregroundColor(.black)
                 
@@ -87,7 +87,7 @@ struct CollectionBookView: View {
                         .bold()
                         .foregroundColor(.white)
                     
-                    Text("You found all 18 Brachiosaurus fossils!")
+                    Text("You found all 18 Ceratosaurus fossils!")
                         .font(.title2)
                         .foregroundColor(.white)
                     
@@ -183,7 +183,6 @@ extension UIImage {
         }
         let result = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        
         return result
     }
 }
