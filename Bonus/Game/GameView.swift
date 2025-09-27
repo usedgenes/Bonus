@@ -17,7 +17,6 @@ let sharedFossils: [Fossil] = [
     Fossil(name: "Lower Left Ribcage", rarity: .uncommon, picture:"lowerLeftRib", found: false),
     Fossil(name: "Lower Right Ribcage", rarity: .uncommon, picture:"lowerRightRib", found: false),
     Fossil(name: "Left Thighbone", rarity: .uncommon, picture:"leftThigh", found: false),
-    Fossil(name: "Right Thighbone", rarity: .uncommon, picture: "rightThigh", found: false),
     Fossil(name: "Left Shinbone", rarity: .common, picture: "leftShinbone", found: false),
     Fossil(name: "Right Shinbone", rarity: .common, picture: "rightShinbone", found: false),
     Fossil(name: "Left Foot", rarity: .common, picture: "leftFoot", found: false),

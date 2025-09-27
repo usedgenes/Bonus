@@ -65,6 +65,8 @@ struct CollectionBookView: View {
                     .font(.title3)
                     .foregroundColor(.brown)
                     .multilineTextAlignment(.center)
+                    .lineLimit(2) // allows up to 2 lines
+                    .fixedSize(horizontal: false, vertical: true)
                 
                 Image(fossil.picture)
                     .resizable()
@@ -85,11 +87,23 @@ struct CollectionBookView: View {
         
         .padding()
         .frame(width: screenWidth*0.35, height: screenHeight*0.25)
-        .background(Color.gray.opacity(0.2))
+        .background(fossilCardColor(fossil: fossil))
         .cornerRadius(15)
         
     }
     
+    func fossilCardColor(fossil: Fossil) -> Color {
+        switch fossil.rarity {
+        case .legendary:
+            return Color.yellow.opacity(0.3)
+        case .rare:
+            return Color.purple.opacity(0.3)
+        case .uncommon:
+            return Color.green.opacity(0.3)
+        case .common:
+            return Color.brown.opacity(0.3)
+        }
+    }
 }
 
 
