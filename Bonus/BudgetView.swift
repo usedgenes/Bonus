@@ -85,6 +85,11 @@ struct BudgetView: View {
         let progress = min(max((offsetY - 100) / maxOffset, 0), 1)
         return Double(progress)
     }
+    
+    var botOpacity: Double {
+        let raw = 1 - topOpacity
+        return 0.5 + raw * 0.5
+    }
 
     var topOffset: CGFloat {
 //        let maxOffset: CGFloat = 50
@@ -130,7 +135,9 @@ struct BudgetView: View {
                 .padding()
                 .opacity(topOpacity)
                 
-                                
+                // this is the code for the calculator to enter the monthly budget if
+                // we ever need that again
+                //
                 //                Text("\(monthlyBudget, specifier: "%.2f")")
                 //                    .font(Font.largeTitle)
                 //
@@ -191,10 +198,33 @@ struct BudgetView: View {
                 
                 Text("Recent Transactions:")
                     .font(Font.title.bold())
+                    .padding()
                 
-                // add money transactions here
+                ScrollView {
+                    
+                    VStack(alignment: .leading) {
+                        HStack {
+                            //this is an example
+                            Text("Transaction 1:")
+                                .font(Font.title2)
+                            
+                            Text("$\(userSpending, specifier: "%.2f")")
+                                .font(Font.title2)
+                            
+                            // add money transactions here i guess
+                            // this ui kinda sucks
+                        }
+                            .padding(40)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .shadow(radius: 3)
+                            .opacity(botOpacity)
+                            
+                        
+                    }
+                }
+                .padding()
                 
-                Spacer()
             }
             .frame(maxWidth: .infinity)
             .frame(height: .infinity)
@@ -207,21 +237,24 @@ struct BudgetView: View {
                     offsetY = offsetY > 200 ? 100 : UIScreen.main.bounds.height * 0.7
                 }
             }
-            .gesture(
-                DragGesture()
-                    .updating($dragOffset) { value, state, _ in
-                        state = value.translation.height
-                    }
-                    .onEnded { value in
-                        // Snap to top or bottom depending on drag
-                        let newOffset = offsetY + value.translation.height
-                        let middle = UIScreen.main.bounds.height * 0.5
-                        withAnimation(.easeInOut) {
-                            offsetY = newOffset < middle ? 100 : UIScreen.main.bounds.height * 0.4
-                            }
-                        }
-                )
-                .animation(.easeInOut, value: offsetY)
+            
+            // this commented stuff is for dragging the thing up but lowk it feels weird
+            // so it's click only now
+//            .gesture(
+//                DragGesture()
+//                    .updating($dragOffset) { value, state, _ in
+//                        state = value.translation.height
+//                    }
+//                    .onEnded { value in
+//                        // Snap to top or bottom depending on drag
+//                        let newOffset = offsetY + value.translation.height
+//                        let middle = UIScreen.main.bounds.height * 0.7
+//                        withAnimation(.easeInOut) {
+//                            offsetY = newOffset < middle ? 100 : UIScreen.main.bounds.height * 0.7
+//                            }
+//                        }
+//                )
+//                .animation(.easeInOut, value: offsetY)
         }
     }
 }
