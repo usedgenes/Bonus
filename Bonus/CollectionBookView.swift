@@ -11,16 +11,9 @@ struct CollectionBookView: View {
     
     var body: some View {
         
-        VStack(spacing: 20) {
+        VStack(spacing: screenHeight*0.02) {
             ZStack{
                 HStack{
-                    Button(action: {
-                        print("Go Back")
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title)
-                            .foregroundColor(.brown)
-                    }
                     Spacer()
                 }
                 .frame(width: screenWidth*0.87)
@@ -34,7 +27,7 @@ struct CollectionBookView: View {
             Image(systemName: "eraser")
                 .resizable()
                 .scaledToFit()
-                .frame(width: screenWidth*0.75, height: screenHeight*0.2)
+                .frame(width: screenWidth*0.75, height: screenHeight*0.18)
             
             Text("Brachiosaurus Fossils")
                 .font(.title2)
@@ -44,9 +37,9 @@ struct CollectionBookView: View {
             
             ScrollView {
                 
-                VStack(spacing: 20) { // spacing between HStacks
+                VStack(spacing: screenHeight*0.02) { // spacing between HStacks
                     ForEach(0..<9, id: \.self) { rowIndex in
-                        HStack(spacing: 20) { // spacing between images
+                        HStack(spacing: screenHeight*0.02) { // spacing between images
                             createFossilCard(fossil: sharedFossils[rowIndex*2])
                             createFossilCard(fossil: sharedFossils[rowIndex*2+1])
                         }
@@ -59,24 +52,29 @@ struct CollectionBookView: View {
     }
     
     func createFossilCard(fossil: Fossil) -> some View {
-        VStack(spacing: 10) {
+        VStack(spacing: screenHeight*0.01) {
             if fossil.found {
-                Text(fossil.name)
-                    .font(.title3)
-                    .foregroundColor(.brown)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2) // allows up to 2 lines
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack (alignment: VerticalAlignment.bottom) {
+                    Text(fossil.name.uppercased())
+                        .font(.title3)
+                        .foregroundColor(.brown)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2) // allows up to 2 lines
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.35)
+                .border(Color.black, width:2)
                 
                 Image(fossil.picture)
                     .resizable()
-                    .scaledToFit()
-                    .frame(height: 100)
+                    .scaledToFill()
+                    .frame(height: screenHeight*0.27*0.45)
                     .cornerRadius(10)
                 
-                Text(fossil.rarity.rawValue.uppercased())
-                    .font(.subheadline)
+                Text(fossil.rarity.rawValue.lowercased())
+                    .font(.system(size: 21))
                     .foregroundColor(.brown)
+                    .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.20)
                 
             } else {
                 Text("Undiscovered ...")
@@ -86,24 +84,13 @@ struct CollectionBookView: View {
         }
         
         .padding()
-        .frame(width: screenWidth*0.35, height: screenHeight*0.25)
-        .background(fossilCardColor(fossil: fossil))
-        .cornerRadius(15)
+        .frame(width: screenWidth*0.41, height: screenHeight*0.27)
+        .background(fossil.rarityColor.opacity(0.6))
+        .cornerRadius(8)
         
     }
     
-    func fossilCardColor(fossil: Fossil) -> Color {
-        switch fossil.rarity {
-        case .legendary:
-            return Color.yellow.opacity(0.3)
-        case .rare:
-            return Color.purple.opacity(0.3)
-        case .uncommon:
-            return Color.green.opacity(0.3)
-        case .common:
-            return Color.brown.opacity(0.3)
-        }
-    }
+
 }
 
 
@@ -117,3 +104,17 @@ struct CollectionBookView_Preview: PreviewProvider {
     
 }
 
+/*
+ func fossilCardColor(fossil: Fossil) -> Color {
+     switch fossil.rarity {
+     case .legendary:
+         return Color.yellow.opacity(0.6)
+     case .rare:
+         return Color.purple.opacity(0.6)
+     case .uncommon:
+         return Color.green.opacity(0.6)
+     case .common:
+         return Color.brown.opacity(0.6)
+     }
+ }
+ */
