@@ -13,7 +13,7 @@ struct CollectionBookView: View {
     
     
     
-    let fossil1 = Fossil(name: "Fossil 1", rarity: .rare, picture: "eraser")
+    let fossil1 = Fossil(name: "Fossil 1", rarity: .rare, picture: "eraser", found: true)
     
     
     var body: some View {
