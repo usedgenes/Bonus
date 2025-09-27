@@ -32,6 +32,11 @@ let sharedFossils: [Fossil] = [
 struct GameView: View {
     @State private var foundFossil: Fossil? = nil
     @EnvironmentObject var fossilCollection: FossilCollection
+    enum GameNavigation: Hashable {
+        case collectionBook
+    }
+
+    @State private var navigationPath = NavigationPath()
     let columns = 6
     let rows = 6
 
@@ -39,100 +44,109 @@ struct GameView: View {
         repeating: Array(repeating: Plot(state: .untouched, fossil: nil), count: 6),
         count: 6
     )
-
     var body: some View {
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
-        ZStack {
-            // Background grass image
-            Image("grassBackground")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-
-            VStack {
-                Spacer() // Optional: adds space above the grid
+        NavigationStack(path: $navigationPath) {
+            ZStack {
+                // Background grass image
+                Image("grassBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
                 
-                Button("Reset Grid") {
+                VStack {
+                    Spacer() // Optional: adds space above the grid
+                    
+                    Button("Reset Grid") {
                         resetGrid()
                     }
                     .padding()
                     .background(Color.red)
                     .foregroundColor(.white)
                     .cornerRadius(8)
-                
-                LazyVGrid(columns: layout, spacing: 2) {
-                    ForEach(0..<(rows * columns), id: \.self) { index in
-                        let row = index / columns
-                        let col = index % columns
-                        let plot = grid[row][col]
-
-                        ZStack {
-                            Image("dirt")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 60, height: 60)
-                                .clipped()
-
-                            if let fossil = plot.fossil, fossil.found {
-                                Image("bone")
+                    
+                    LazyVGrid(columns: layout, spacing: 2) {
+                        ForEach(0..<(rows * columns), id: \.self) { index in
+                            let row = index / columns
+                            let col = index % columns
+                            let plot = grid[row][col]
+                            
+                            ZStack {
+                                Image("dirt")
                                     .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 30, height: 30)
-                            }
-
-                            if plot.state == .dug {
-                                Color.black.opacity(0.3)
+                                    .scaledToFill()
                                     .frame(width: 60, height: 60)
-                                    .cornerRadius(4)
+                                    .clipped()
+                                
+                                if let fossil = plot.fossil, fossil.found {
+                                    Image("bone")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 30, height: 30)
+                                }
+                                
+                                if plot.state == .dug {
+                                    Color.black.opacity(0.3)
+                                        .frame(width: 60, height: 60)
+                                        .cornerRadius(4)
+                                }
+                            }
+                            .frame(width: 60, height: 60)
+                            .onTapGesture {
+                                dig(atRow: row, col: col)
                             }
                         }
-                        .frame(width: 60, height: 60)
-                        .onTapGesture {
-                            dig(atRow: row, col: col)
-                        }
+                        
                     }
+                    
+                    .padding()
+                    .background(Color.clear)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    Spacer() // Optional: adds space below the grid
                 }
-                .padding()
-                .background(Color.clear)
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Spacer() // Optional: adds space below the grid
-            }
-            if let fossil = foundFossil {
-                ZStack {
-                    // Background overlay
-                    Color.black.opacity(0.5)
-                        .ignoresSafeArea()
-
-                    VStack(spacing: 16) {
-                        Image(fossil.picture)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-
-                        Text(fossil.name)
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(fossil.rarityColor)
-
-                        Text(fossil.rarity.rawValue.capitalized)
-                            .font(.headline)
-                            .foregroundColor(.white)
-
-                        Button("Close") {
-                            foundFossil = nil
+                if let fossil = foundFossil {
+                    ZStack {
+                        // Background overlay
+                        Color.black.opacity(0.5)
+                            .ignoresSafeArea()
+                        
+                        VStack(spacing: 16) {
+                            Image(fossil.picture)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                            
+                            Text(fossil.name)
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(fossil.rarityColor)
+                            
+                            Text(fossil.rarity.rawValue.capitalized)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            
+                            Button("Close") {
+                                foundFossil = nil
+                            }
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(10)
                         }
                         .padding()
-                        .background(Color.white)
-                        .cornerRadius(10)
+                        .background(Color.black.opacity(0.85))
+                        .cornerRadius(20)
+                        .padding()
                     }
-                    .padding()
-                    .background(Color.black.opacity(0.85))
-                    .cornerRadius(20)
-                    .padding()
+                    .transition(.scale)
+                    .zIndex(1) // Ensure it appears on top
                 }
-                .transition(.scale)
-                .zIndex(1) // Ensure it appears on top
+            }
+            .navigationDestination(for: GameNavigation.self) { destination in
+                switch destination {
+                case .collectionBook:
+                    CollectionBookView()
+                }
             }
         }
         .onAppear {
@@ -214,6 +228,9 @@ struct GameView: View {
         }
 
         GridStorage.save(grid: grid)
+        if fossilCollection.foundCount == sharedFossils.count {
+            navigationPath.append(GameView.GameNavigation.collectionBook)
+        }
     }
 
     func color(for plot: Plot) -> Color {
