@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CollectionBookView: View {
     
@@ -122,11 +123,15 @@ struct CollectionBookView: View {
                     .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.27)
                 
                 // Image
-                Image(fossil.picture)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: screenHeight*0.27*0.53)
-                    .cornerRadius(10)
+                if let fossilImage = UIImage(named: fossil.picture)?.removingWhiteBackground() {
+                    Image(uiImage: fossilImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: screenHeight*0.27*0.53)
+                } else {
+                    Text("Image not found")
+                }
+
                 
                 // Rarity
                 Text(rarityText)
@@ -148,6 +153,24 @@ struct CollectionBookView: View {
         .frame(width: screenWidth*0.41, height: screenHeight*0.27)
         .background(fossil.rarityColor.opacity(0.6))
         .cornerRadius(8)
+    }
+}
+
+extension UIImage {
+    func removingWhiteBackground() -> UIImage? {
+        guard let rawImage = self.cgImage else { return nil }
+        
+        // Mask out white (tweak these numbers if needed)
+        let colorMasking: [CGFloat] = [200, 255, 200, 255, 200, 255]
+        
+        UIGraphicsBeginImageContext(self.size)
+        if let masked = rawImage.copy(maskingColorComponents: colorMasking) {
+            UIImage(cgImage: masked).draw(in: CGRect(origin: .zero, size: self.size))
+        }
+        let result = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return result
     }
 }
 
