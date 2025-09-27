@@ -22,6 +22,14 @@ class GridStorage {
         }
     }
 
+    static func clear() {
+        let url = getDocumentsDirectory().appendingPathComponent(filename)
+        if FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.removeItem(at: url)
+            print("Grid reset: file deleted.")
+        }
+    }
+    
     static func load() -> [[Plot]]? {
         let url = getDocumentsDirectory().appendingPathComponent(filename)
         guard FileManager.default.fileExists(atPath: url.path) else {
