@@ -100,10 +100,17 @@ struct GameView: View {
                                     .clipped()
                                 
                                 if let fossil = plot.fossil, fossil.found {
-                                    Image("bone")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 30, height: 30)
+                                    if let fossilImage = UIImage(named: fossil.picture)?.removingWhiteBackground() {
+                                        Image(uiImage: fossilImage)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 40, height: 40)
+                                    } else {
+                                        Image(fossil.picture) // fallback if the custom UIImage fails
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 40, height: 40)
+                                    }
                                 }
                                 
                                 if plot.state == .dug {
@@ -141,10 +148,17 @@ struct GameView: View {
                             .ignoresSafeArea()
                         
                         VStack(spacing: 16) {
-                            Image(fossil.picture)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
+                            if let fossilImage = UIImage(named: fossil.picture)?.removingWhiteBackground() {
+                                Image(uiImage: fossilImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                            } else {
+                                Image(fossil.picture)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                            }
                             
                             Text(fossil.name)
                                 .font(.title)
