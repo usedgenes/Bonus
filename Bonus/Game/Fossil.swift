@@ -14,12 +14,12 @@ struct Fossil: Codable, Identifiable {
     let picture: String
     var found: Bool
 
-    init(name: String, rarity: Rarity, picture: String) {
+    init(name: String, rarity: Rarity, picture: String, found: Bool) {
         self.id = UUID()
         self.name = name
         self.rarity = rarity
         self.picture = picture
-        self.found = false
+        self.found = found
     }
 }
 
