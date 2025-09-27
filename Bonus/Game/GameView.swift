@@ -47,22 +47,7 @@ struct GameView: View {
         .onAppear {
             setupGrid()
         }
-        VStack(spacing: 20) {
-            Text("Hello, SwiftUI!")
-                .font(.largeTitle)
-                .foregroundColor(.blue)
-            
-            HStack {
-                NavigationLink {
-                    CollectionBookView()
-                } label: {
-                    Text("Collection Book")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                }
-                Spacer()
-            }
-        }
+        
     }
 
     func setupGrid() {

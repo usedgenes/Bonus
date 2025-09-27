@@ -20,25 +20,27 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "dollarsign.circle")
                     Text("Budget")
-                    
-                    GameView()
-                        .tabItem {
-                            Image(systemName: "gamecontroller")
-                            Text("Explore")
-                        }
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gearshape.fill")
-                            Text("Settings")
-                        }
+                }
+            GameView()
+                .tabItem {
+                    Image(systemName: "gamecontroller")
+                    Text("Explore")
+                }
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "gearshape.fill")
+                    Text("Settings")
                 }
         }
     }
 }
-#Preview {
-    ContentView()
-}
 
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .environmentObject(FossilCollection(fossils: sharedFossils))
+    }
+}
 
 extension View {
     func hideKeyboardWhenTappedAround() -> some View  {
