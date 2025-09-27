@@ -21,11 +21,13 @@ struct ContentView: View {
                     Image(systemName: "dollarsign.circle")
                     Text("Budget")
                 }
-            GameView()
-                .tabItem {
-                    Image(systemName: "gamecontroller")
-                    Text("Explore")
-                }
+            NavigationStack {
+                GameView()
+            }
+                    .tabItem {
+                        Image(systemName: "gamecontroller")
+                        Text("Explore")
+                    }
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape.fill")
