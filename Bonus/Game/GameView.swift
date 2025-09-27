@@ -51,7 +51,15 @@ struct GameView: View {
 
             VStack {
                 Spacer() // Optional: adds space above the grid
-
+                
+                Button("Reset Grid") {
+                        resetGrid()
+                    }
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                
                 LazyVGrid(columns: layout, spacing: 2) {
                     ForEach(0..<(rows * columns), id: \.self) { index in
                         let row = index / columns
@@ -65,7 +73,14 @@ struct GameView: View {
                                 .frame(width: 60, height: 60)
                                 .clipped()
 
-                            if plot.state == .dug && plot.fossil == nil {
+                            if let fossil = plot.fossil, fossil.found {
+                                Image("bone")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 30, height: 30)
+                            }
+
+                            if plot.state == .dug {
                                 Color.black.opacity(0.3)
                                     .frame(width: 60, height: 60)
                                     .cornerRadius(4)
@@ -105,9 +120,7 @@ struct GameView: View {
                             .foregroundColor(.white)
 
                         Button("Close") {
-                            withAnimation {
-                                foundFossil = nil
-                            }
+                            foundFossil = nil
                         }
                         .padding()
                         .background(Color.white)
@@ -131,7 +144,18 @@ struct GameView: View {
         }
         
     }
+    func resetGrid() {
+        // Remove saved grid file
+        GridStorage.clear()
 
+        // Reset fossils to all unfound
+        for index in fossilCollection.fossils.indices {
+            fossilCollection.fossils[index].found = false
+        }
+
+        // Re-generate a new grid
+        setupGrid()
+    }
     func setupGrid() {
         // Step 1: Define your unique fossils
         let fossils = sharedFossils
