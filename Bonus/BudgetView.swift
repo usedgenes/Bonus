@@ -73,7 +73,12 @@ struct BudgetView: View {
     @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
     @GestureState private var dragOffset: CGFloat = 0
     @EnvironmentObject var budgetModel: BudgetModel
+    @State private var withdrawals: [Withdrawal] = []
+    @State private var isLoading = true
+    @EnvironmentObject var customer: CustomerStore
+    let withdrawalRequest = WithdrawalRequest()
 
+    
     var bottomHeight: CGFloat {
         return offsetY < 200 ? 400 : 200 // or pick your own sizes
     }
@@ -153,31 +158,51 @@ struct BudgetView: View {
                     .frame(width: 40, height: 6)
                     .foregroundColor(.gray)
                     .padding(.top, 8)
-                
-                Text("Recent Transactions:")
-                    .font(Font.title.bold())
-                    .padding()
-                
-                ScrollView {
-                    
-                    VStack(alignment: .leading) {
-                        HStack {
-                            //this is an example
-                            Text("Transaction 1:")
-                                .font(Font.title2)
-                            
-                            Text("$\(userSpending, specifier: "%.2f")")
-                                .font(Font.title2)
-                            
-                            // add money transactions here i guess
-                            // this ui kinda sucks
+                HStack {
+                    Text("Recent Transactions:")
+                        .font(Font.title.bold())
+                        .padding()
+                    Button(action: {
+                        Task {
+                            await loadWithdrawals()
                         }
-                            .frame(width: 350, height: 100, alignment: .center)
-                            .background(Color.white)
-                            .cornerRadius(8)
-                            .shadow(radius: 3)
-                            .opacity(botOpacity)
-                            
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.title2)
+                    }
+                }
+
+                ScrollView {
+                   
+                    VStack(alignment: .leading, spacing: 16) {
+                        if (customer.account == nil) {
+                            Text("No account added")
+                        }
+                        else {
+                            if isLoading {
+                                ProgressView("Loading...")
+                            } else if withdrawals.isEmpty {
+                                Text("No withdrawals found.")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(withdrawals, id: \.withdrawalId) { withdrawal in
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Withdrawal ID: \(withdrawal.withdrawalId)")
+                                            .font(.headline)
+                                        Text("Amount: $\(withdrawal.amount, specifier: "%.2f")")
+                                        Text("Status: \(withdrawal.status.rawValue.capitalized)")
+                                        Text("Date: \(withdrawal.transactionDate ?? "N/A")")
+                                    }
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                    .task {
+                        await loadWithdrawals()
                     }
                 }
             }
@@ -211,8 +236,27 @@ struct BudgetView: View {
 //                .animation(.easeInOut, value: offsetY)
         }
     }
+    
+    func loadWithdrawals() async {
+        if(customer.account == nil) {
+            
+        }
+        else { do {
+            if let result = try await withdrawalRequest.getWithdrawalsFromAccountId(customer.account!.accountId) {
+                withdrawals = result
+            }
+        } catch {
+            print("Failed to load withdrawals:", error)
+        }
+            isLoading = false
+        }
+    }
 }
 
 #Preview {
     BudgetView()
+        .environmentObject(FossilCollection(fossils: sharedFossils))
+        .environmentObject(BudgetModel())
+        .environmentObject(CustomerStore())
 }
+

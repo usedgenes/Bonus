@@ -79,6 +79,28 @@ class CustomerStore: ObservableObject {
         }
     }
     
+//    func getAccount(accountType: AccountType, nickname: String, rewards: Int, balance: Int, accountNumber: String? = nil) async {
+//        do {
+//            let accountToCreate = AccountPostData(
+//                accountType: accountType,
+//                nickname: nickname,
+//                rewards: 0,
+//                balance: balance,
+//                accountNumber: accountNumber
+//            )
+//            if let accountPostResponse = try await AccountRequest().postAccount(customerId, accountToCreate) {
+//                let message = accountPostResponse.message
+//                let accountCreated = accountPostResponse.objectCreated
+//                print("\(message): \(accountCreated)")
+//                if let created = accountCreated {
+//                    account = created
+//                }
+//            }
+//        } catch {
+//            print(error)
+//        }
+//    }
+    
     func postWithdrawal(medium: TransactionMedium, transactionDate: String? = nil, amount: Double, status: TransferStatus? = nil, description: String? = nil) async {
         do {
             let withdrawalToCreate = WithdrawalPostData(
