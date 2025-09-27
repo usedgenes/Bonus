@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct GameView: View {
+    @EnvironmentObject var fossilCollection: FossilCollection
     let columns = 6
     let rows = 6
 
@@ -89,10 +90,12 @@ struct GameView: View {
         var plot = grid[row][col]
         plot.state = .dug
 
-        if var fossil = plot.fossil {
-            fossil.found = true
-            plot.fossil = fossil
-            // You could trigger a reward or display animation here
+        if let fossil = plot.fossil, !fossil.found {
+            fossilCollection.markFound(fossilName: fossil.name)
+            // Update the plot's fossil as found
+            var updatedFossil = fossil
+            updatedFossil.found = true
+            plot.fossil = updatedFossil
         }
 
         grid[row][col] = plot
