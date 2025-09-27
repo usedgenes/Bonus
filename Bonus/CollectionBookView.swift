@@ -1,13 +1,12 @@
 //
-//  BudgetView.swift
+//  CollectionBookView.swift
 //  Bonus
 //
 //  Created by Eugene on 9/26/25.
 //
-
 import SwiftUI
 
-struct BudgetView: View {
+struct CollectionBookView: View {
     @State private var counter = 0
 
     var body: some View {
@@ -33,8 +32,9 @@ struct BudgetView: View {
     }
 }
 
-struct BudgetView_Previews: PreviewProvider {
+struct CollectionBookView_Preview: PreviewProvider {
     static var previews: some View {
         BudgetView()
     }
 }
+

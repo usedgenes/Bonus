@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     var body: some View {
@@ -14,7 +15,7 @@ struct ContentView: View {
                 
                 VStack {
                     HStack {
-                        NavigationLink(destination: CollectionView()) {
+                        NavigationLink(destination: CollectionBookView()) {
                             Image(systemName: "book.closed.fill")
                                 .font(.largeTitle)
                         }
@@ -43,3 +44,14 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+
+extension View {
+    func hideKeyboardWhenTappedAround() -> some View  {
+        return self.onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                            to: nil, from: nil, for: nil)
+        }
+    }
+}
+
