@@ -11,6 +11,12 @@ struct CollectionBookView: View {
     
     var body: some View {
         ZStack {
+            
+            Image("bookBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            
             VStack(spacing: screenHeight*0.02) {
                 // Header
                 ZStack {
@@ -20,14 +26,15 @@ struct CollectionBookView: View {
                     
                     Text("Collection Book")
                         .font(.title)
-                        .foregroundColor(.brown)
+                        .bold()
+                        .foregroundColor(.black)
                 }
                 
                 // Main image
                 if fossilCollection.foundCount >= 18 {
-                    Image(systemName: "eraser")
+                    Image("fullDinosaur")
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
                         .frame(width: screenWidth*0.75, height: screenHeight*0.18)
                 } else {
                     Image("leftArm")
@@ -39,7 +46,7 @@ struct CollectionBookView: View {
                 // Fossil count
                 Text("Brachiosaurus Fossils (\(fossilCollection.foundCount)/18)")
                     .font(.title2)
-                    .foregroundColor(.brown)
+                    .foregroundColor(.black)
                 
                 // Fossil grid
                 ScrollView {
