@@ -9,43 +9,48 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+    @State private var selectedTab = 1
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             CollectionBookView()
                 .tabItem {
                     Image(systemName: "book.closed.fill")
                     Text("Collection")
                 }
+                .tag(0)
+            
             BudgetView()
                 .tabItem {
                     Image(systemName: "dollarsign.circle")
                     Text("Budget")
-                    
-                    GameView()
-                        .tabItem {
-                            Image(systemName: "gamecontroller")
-                            Text("Explore")
-                        }
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gearshape.fill")
-                            Text("Settings")
-                        }
-
                 }
-            AccountInfoView()
+                .tag(1)
+            
+            NavigationStack {
+                GameView(selectedTab: $selectedTab)
+            }
+            .tabItem {
+                Image(systemName: "gamecontroller")
+                Text("Explore")
+            }
+            .tag(2)
+            
+            SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape.fill")
-                    Text("Account")
+                    Text("Settings")
                 }
+                .tag(3)
         }
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .environmentObject(FossilCollection(fossils: sharedFossils))
+    }
 }
-
 
 extension View {
     func hideKeyboardWhenTappedAround() -> some View  {

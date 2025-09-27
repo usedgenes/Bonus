@@ -1,168 +1,159 @@
 import SwiftUI
 
-
 struct CollectionBookView: View {
-    @State private var counter = 0
+    
+    @EnvironmentObject var fossilCollection: FossilCollection
+    
+    @State private var showCongrats = false
+    
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
-    let fossil1 = Fossil(name: "Fossil 1", rarity: .rare, picture: "eraser")
     
     var body: some View {
-        VStack(spacing: 20) {
-            ZStack{
-                HStack{
-                    Button(action: {
-                        print("Go Back")
-                        
-                    }) {
-                        
-                        Image(systemName: "chevron.left")
-                            .font(.title)
-                            .foregroundColor(.brown)
-                    }
-                    Spacer()
-                    
-                }
-                
-                .frame(width: screenWidth*0.87)
-                
-                .border(Color.green, width:2)
-                
-                Text("Collection Book")
-                
-                    .font(.title)
-                
-                    .foregroundColor(.brown)
-                
-            }
+        ZStack {
             
-            Image(systemName: "eraser")
-            
+            Image("bookBackground")
                 .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
             
-                .scaledToFit()
-            
-                .frame(width: screenWidth*0.75, height: screenHeight*0.2)
-            
-            Text("Collected Fossils")
-            
-                .font(.title2)
-            
-                .foregroundColor(.brown)
-            
-            
-            
-            ScrollView {
-                
-                VStack(spacing: 20) { // spacing between HStacks
+            VStack(spacing: screenHeight*0.02) {
+                // Header
+                ZStack {
+                    HStack { Spacer() }
+                        .frame(width: screenWidth*0.87)
+                        .border(Color.green, width:2)
                     
-                    ForEach(0..<10) { _ in
-                        
-                        HStack(spacing: 20) { // spacing between images
-                            
-                            
-                            
-                            createFossilCard(fossil: fossil1)
-                            
-                            
-                            
-                            Image(systemName: "eraser") // second eraser image
-                            
-                                .resizable()
-                            
-                                .scaledToFit()
-                            
-                                .frame(width: screenWidth*0.35, height: screenHeight*0.25)
-                            
-                                .border(Color.green, width: 2)
-                            
-                        }
-                        
-                    }
-                    
+                    Text("Collection Book")
+                        .font(.title)
+                        .bold()
+                        .foregroundColor(.black)
                 }
                 
-                .padding()
+                // Main image
+                if fossilCollection.foundCount >= 18 {
+                    Image("fullDinosaur")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                } else {
+                    Image("leftArm")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                }
                 
+                // Fossil count
+                Text("Brachiosaurus Fossils (\(fossilCollection.foundCount)/18)")
+                    .font(.title2)
+                    .foregroundColor(.black)
+                
+                // Fossil grid
+                ScrollView {
+                    VStack(spacing: screenHeight*0.02) {
+                        ForEach(0..<9, id: \.self) { rowIndex in
+                            HStack(spacing: screenHeight*0.02) {
+                                createFossilCard(fossil: fossilCollection.getFossils()[rowIndex*2])
+                                createFossilCard(fossil: fossilCollection.getFossils()[rowIndex*2+1])
+                            }
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .padding()
+            .onAppear {
+                if fossilCollection.foundCount >= 18 && !fossilCollection.hasShownCongrats {
+                    showCongrats = true
+                    fossilCollection.hasShownCongrats = true
+                }
             }
             
+            // Congratulations overlay
+            if showCongrats {
+                Color.black.opacity(0.6)
+                    .edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 20) {
+                    Text("🎉 Congratulations! 🎉")
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(.white)
+                    
+                    Text("You found all 18 Brachiosaurus fossils!")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                    
+                    Button(action: {
+                        withAnimation { showCongrats = false }
+                    }) {
+                        Text("Close")
+                            .font(.title2)
+                            .bold()
+                            .padding()
+                            .background(Color.white)
+                            .foregroundColor(.green)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding()
+                .background(Color.green.opacity(0.8))
+                .cornerRadius(20)
+                .shadow(radius: 10)
+            }
         }
-        
-        .padding()
-        
     }
     
-    
-    
+    // MARK: - Fossil Card
     func createFossilCard(fossil: Fossil) -> some View {
+        // Compute text outside the VStack
+        let rarityText = fossil.rarity.rawValue.prefix(1).uppercased() + fossil.rarity.rawValue.dropFirst()
         
-        VStack(spacing: 10) {
-            
-            
-            
+        return VStack(spacing: screenHeight*0.01) {
             if fossil.found {
-                
-                
-                
-                Text(fossil.name)
-                
+                // Name
+                Text(fossil.name.uppercased())
                     .font(.title3)
-                
-                    .foregroundColor(.brown)
-                
+                    .bold()
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.27)
                 
-                
-                
-                Image(systemName: fossil.picture)
-                
+                // Image
+                Image(fossil.picture)
                     .resizable()
-                
-                    .scaledToFit()
-                
-                    .frame(height: 100)
-                
+                    .scaledToFill()
+                    .frame(height: screenHeight*0.27*0.53)
                     .cornerRadius(10)
                 
-                
-                
-                Text(fossil.rarity.rawValue.uppercased())
-                
-                    .font(.title3)
-                
-                    .foregroundColor(.brown)
+                // Rarity
+                Text(rarityText)
+                    .font(.system(size: 21))
+                    .foregroundColor(.black)
+                    .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.20)
                 
             } else {
-                
-                Text("Undiscovered ...")
-                
-                    .foregroundColor(.brown)
-                
-                    .multilineTextAlignment(.center)
-                
+                Text("""
+                Undiscovered
+                ...
+                """)
+                .font(.system(size: 22))
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
             }
-            
         }
         .padding()
-        .frame(width: screenWidth*0.35, height: screenHeight*0.25)
-        .background(Color.gray.opacity(0.2))
-        .cornerRadius(15)
-        //.shadow(radius: 5)
+        .frame(width: screenWidth*0.41, height: screenHeight*0.27)
+        .background(fossil.rarityColor.opacity(0.6))
+        .cornerRadius(8)
     }
 }
 
 struct CollectionBookView_Preview: PreviewProvider {
     static var previews: some View {
         CollectionBookView()
+            .environmentObject(FossilCollection(fossils: sharedFossils))
     }
 }
-
-
-/*
- 
- Image(systemName: "eraser") // first eraser image
- .resizable()
- .scaledToFit()
- .frame(width: screenWidth*0.35, height: screenHeight*0.25)
- .border(Color.green, width: 2)
- */
