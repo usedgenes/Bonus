@@ -15,7 +15,6 @@ let sharedFossils: [Fossil] = [
 ]
 
 struct GameView: View {
-    @EnvironmentObject var fossilCollection: FossilCollection
     let columns = 6
     let rows = 6
 
