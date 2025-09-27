@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+let sharedFossils: [Fossil] = [
+    Fossil(name: "Tricera Tooth", rarity: .common, picture: "tricera"),
+    Fossil(name: "Stego Spike", rarity: .uncommon, picture: "stego"),
+    Fossil(name: "Rex Jaw", rarity: .rare, picture: "trex"),
+    // add the rest of your fossils here
+]
+
 struct GameView: View {
     @EnvironmentObject var fossilCollection: FossilCollection
     let columns = 6
@@ -45,12 +52,7 @@ struct GameView: View {
 
     func setupGrid() {
         // Step 1: Define your unique fossils
-        let fossils: [Fossil] = [
-            Fossil(name: "Tricera Tooth", rarity: .common, picture: "tricera"),
-            Fossil(name: "Stego Spike", rarity: .uncommon, picture: "stego"),
-            Fossil(name: "Rex Jaw", rarity: .rare, picture: "trex"),
-            // Add 17 more unique fossils here...
-        ]
+        let fossils = sharedFossils
 
         // Step 2: Generate all positions in the grid
         let rows = 6
@@ -131,5 +133,6 @@ func color(for state: PlotState) -> Color {
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {
         GameView()
+            .environmentObject(FossilCollection(fossils: sharedFossils))
     }
 }
