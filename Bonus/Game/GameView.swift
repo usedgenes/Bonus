@@ -55,8 +55,21 @@ struct GameView: View {
                     .scaledToFill()
                     .ignoresSafeArea()
                 
-                VStack {
+                VStack(spacing: 12) {
                     Spacer() // Optional: adds space above the grid
+                    
+                    VStack(spacing: 4) {
+                            Text("Brachiosaurus Dig Site: \(completionPercentage())% complete")
+                                .font(.headline)
+                                .foregroundColor(.white)
+
+                            Text("Click to dig (costs 10 coins)")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    .padding()
+                    .background(Color.black.opacity(0.5))
+                    .cornerRadius(8)
                     
                     Button("Reset Grid") {
                         resetGrid()
@@ -159,6 +172,14 @@ struct GameView: View {
         }
         
     }
+    
+    func completionPercentage() -> Int {
+        let total = sharedFossils.count
+        let found = fossilCollection.foundCount
+        guard total > 0 else { return 0 }
+        return Int((Double(found) / Double(total)) * 100)
+    }
+    
     func resetGrid() {
         // Remove saved grid file
         GridStorage.clear()
