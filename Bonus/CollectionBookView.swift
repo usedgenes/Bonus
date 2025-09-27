@@ -24,12 +24,22 @@ struct CollectionBookView: View {
                     .foregroundColor(.brown)
             }
             
-            Image(systemName: "eraser")
-                .resizable()
-                .scaledToFit()
-                .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+            if (fossilCollection.foundCount >= 18) {
+                Image(systemName: "eraser")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                
+            } else {
+                Image("leftArm")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+            }
             
-            Text("Brachiosaurus Fossils")
+
+            
+            Text("Brachiosaurus Fossils (" + String(fossilCollection.foundCount) + "/18)")
                 .font(.title2)
                 .foregroundColor(.brown)
             
@@ -54,31 +64,42 @@ struct CollectionBookView: View {
     func createFossilCard(fossil: Fossil) -> some View {
         VStack(spacing: screenHeight*0.01) {
             if fossil.found {
-                HStack (alignment: VerticalAlignment.bottom) {
+                VStack () {
+                    Spacer()
                     Text(fossil.name.uppercased())
                         .font(.title3)
-                        .foregroundColor(.brown)
+                        .bold()
+                        .foregroundColor(.black)
                         .multilineTextAlignment(.center)
                         .lineLimit(2) // allows up to 2 lines
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.35)
-                .border(Color.black, width:2)
+                .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.27)
+                //.border(Color.black, width:2)
                 
                 Image(fossil.picture)
                     .resizable()
                     .scaledToFill()
-                    .frame(height: screenHeight*0.27*0.45)
+                    .frame(height: screenHeight*0.27*0.53)
                     .cornerRadius(10)
                 
-                Text(fossil.rarity.rawValue.lowercased())
-                    .font(.system(size: 21))
-                    .foregroundColor(.brown)
-                    .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.20)
+                VStack {
+                    let fossilRarityString = String(fossil.rarity.rawValue)
+                    Text(String(fossilRarityString.prefix(1).uppercased() + fossilRarityString.dropFirst()))
+                        .font(.system(size: 21))
+                        .foregroundColor(.black)
+                    
+                    Spacer()
+                        
+                }.frame(width: screenWidth*0.37, height: screenHeight*0.27*0.20)
                 
             } else {
-                Text("Undiscovered ...")
-                    .foregroundColor(.brown)
+                Text("""
+                Undiscovered
+                ...
+                """)
+                    .font(.system(size: 22))
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
             }
         }
@@ -93,28 +114,26 @@ struct CollectionBookView: View {
 
 }
 
+extension String {
+    func capitalizingFirstLetter() -> String {
+        return prefix(1).uppercased() + dropFirst()
+    }
+    
+    mutating func capitalizeFirstLetter() {
+        self = self.capitalizingFirstLetter()
+    }
+}
+
 
 struct CollectionBookView_Preview: PreviewProvider {
     
     static var previews: some View {
         
         CollectionBookView()
+            .environmentObject(FossilCollection(fossils: sharedFossils))
         
     }
     
 }
 
-/*
- func fossilCardColor(fossil: Fossil) -> Color {
-     switch fossil.rarity {
-     case .legendary:
-         return Color.yellow.opacity(0.6)
-     case .rare:
-         return Color.purple.opacity(0.6)
-     case .uncommon:
-         return Color.green.opacity(0.6)
-     case .common:
-         return Color.brown.opacity(0.6)
-     }
- }
- */
+
