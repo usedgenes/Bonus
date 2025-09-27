@@ -70,6 +70,12 @@ public struct CustomerPutResponse: Decodable {
     public var culprit: [String]?
 }
 
+public struct CustomerDeleteResponse: Decodable {
+    public var code: Int?
+    public var message: String?
+    public var culprit: [String]?
+}
+
 open class CustomerRequest {
     fileprivate var requestType: HTTPType!
     fileprivate var accountId: String?
@@ -159,4 +165,18 @@ open class CustomerRequest {
         let customerPutResponse = try JSONDecoder().decode(CustomerPutResponse.self, from: data)
         return customerPutResponse
     }
+    
+    open func deleteCustomers() async throws {
+        requestType = HTTPType.DELETE
+
+        let nseClient = NSEClient.sharedInstance
+        let url = "http://api.nessieisreal.com/data?type=Customers&key=\(nseClient.getKey())"
+        var request = nseClient.makeRequest(url, requestType: requestType)
+
+        // Perform the request (204 → success, no content to decode)
+        _ = try await nseClient.loadDataFromURL(request)
+
+        print("✅ All customers deleted successfully")
+    }
+
 }

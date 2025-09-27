@@ -6,12 +6,19 @@
 //
 
 import SwiftUI
+import Combine
 
 @main
 struct BonusApp: App {
+    @StateObject var customer = CustomerStore()
+
+    init() {
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(customer)
         }
     }
 }
