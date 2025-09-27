@@ -32,6 +32,7 @@ let sharedFossils: [Fossil] = [
 struct GameView: View {
     @Binding var selectedTab: Int
     @State private var foundFossil: Fossil? = nil
+    @State private var isFlashing = false
     @EnvironmentObject var fossilCollection: FossilCollection
     enum GameNavigation: Hashable {
         case collectionBook
@@ -59,17 +60,30 @@ struct GameView: View {
                     Spacer()
                     
                     VStack(spacing: 4) {
-                            Text("Brachiosaurus Dig Site: \(completionPercentage())% complete")
-                                .font(.headline)
-                                .foregroundColor(.white)
+                        Text("Brachiosaurus Dig Site: \(completionPercentage())% complete")
+                            .font(.title)
+                            .bold()
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
 
-                            Text("Click to dig (costs 10🟡)")
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                    .padding()
-                    .background(Color.black.opacity(0.5))
-                    .cornerRadius(8)
+                        Text("Click to dig (costs 10🟡)")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.8))
+                            .frame(maxWidth: .infinity)
+                            .padding(8)
+                            .background(Color.black.opacity(0.7))
+                            .opacity(isFlashing ? 1 : 0.3)
+                            .animation(
+                                Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                                value: isFlashing
+                            )
+                    }
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+                    .padding(.top)
+                    .onAppear {
+                        isFlashing = true
+                    }
                     
                     
                     LazyVGrid(columns: layout, spacing: 2) {
