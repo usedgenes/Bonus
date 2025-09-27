@@ -7,16 +7,27 @@
 
 import Foundation
 
-enum PlotState: Codable {
+enum PlotState: Codable, Equatable {
     case untouched
     case dug
     case foundItem(String)
-    
-    // Codable implementation (as shown earlier)
-    // ...
+
+    static func == (lhs: PlotState, rhs: PlotState) -> Bool {
+        switch (lhs, rhs) {
+        case (.untouched, .untouched),
+             (.dug, .dug):
+            return true
+        case let (.foundItem(l), .foundItem(r)):
+            return l == r
+        default:
+            return false
+        }
+    }
+
 }
 
 struct Plot: Codable, Identifiable {
     var id = UUID()
     var state: PlotState
+    var fossil: Fossil?
 }

@@ -8,25 +8,27 @@
 import SwiftUI
 
 struct GameView: View {
-    let columns = 10
-    let rows = 10
+    let columns = 6
+    let rows = 6
 
-    @State var grid: [[Plot]] = []
+    @State var grid: [[Plot]] = Array(
+        repeating: Array(repeating: Plot(state: .untouched, fossil: nil), count: 6),
+        count: 6
+    )
 
     var body: some View {
-        let flatGrid = grid.flatMap { $0 }
 
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
 
         ScrollView {
             LazyVGrid(columns: layout, spacing: 2) {
-                ForEach(flatGrid.indices, id: \.self) { index in
+                ForEach(0..<(rows * columns), id: \.self) { index in
                     let row = index / columns
                     let col = index % columns
                     let plot = grid[row][col]
-
+                    
                     Rectangle()
-                        .fill(color(for: plot.state))
+                        .fill(color(for: plot))
                         .frame(height: 30)
                         .onTapGesture {
                             dig(atRow: row, col: col)
@@ -41,31 +43,74 @@ struct GameView: View {
     }
 
     func setupGrid() {
-        if let savedGrid = GridStorage.load() {
-            grid = savedGrid
-        } else {
-            grid = Array(
-                repeating: Array(repeating: Plot(state: .untouched), count: columns),
-                count: rows
-            )
-        }
-    }
+        // Step 1: Define your unique fossils
+        let fossils: [Fossil] = [
+            Fossil(name: "Tricera Tooth", rarity: .common, picture: "tricera"),
+            Fossil(name: "Stego Spike", rarity: .uncommon, picture: "stego"),
+            Fossil(name: "Rex Jaw", rarity: .rare, picture: "trex"),
+            // Add 17 more unique fossils here...
+        ]
 
-    func dig(atRow row: Int, col: Int) {
-        let found = Bool.random()
-        let item = found ? "Bone" : "Nothing"
-        grid[row][col].state = .foundItem(item)
+        // Step 2: Generate all positions in the grid
+        let rows = 6
+        
+        let columns = 6
+        var positions: [(row: Int, col: Int)] = []
+        for row in 0..<rows {
+            for col in 0..<columns {
+                positions.append((row, col))
+            }
+        }
+
+        // Step 3: Shuffle fossils and positions
+        let shuffledFossils = fossils.shuffled()
+        let shuffledPositions = positions.shuffled()
+
+        // Step 4: Create grid with fossils placed at random positions
+        var newGrid: [[Plot]] = Array(
+            repeating: Array(repeating: Plot(state: .untouched, fossil: nil), count: columns),
+            count: rows
+        )
+
+        for i in 0..<shuffledFossils.count {
+            let pos = shuffledPositions[i]
+            newGrid[pos.row][pos.col].fossil = shuffledFossils[i]
+        }
+
+        // Step 5: Set it as your current grid and save it
+        grid = newGrid
         GridStorage.save(grid: grid)
     }
 
-    func color(for state: PlotState) -> Color {
-        switch state {
+
+    func dig(atRow row: Int, col: Int) {
+        guard grid[row][col].state == .untouched else { return }
+
+        var plot = grid[row][col]
+        plot.state = .dug
+
+        if var fossil = plot.fossil {
+            fossil.found = true
+            plot.fossil = fossil
+            // You could trigger a reward or display animation here
+        }
+
+        grid[row][col] = plot
+        GridStorage.save(grid: grid)
+    }
+
+    func color(for plot: Plot) -> Color {
+        switch plot.state {
         case .untouched:
             return .brown
         case .dug:
-            return .gray
-        case .foundItem(let item):
-            return item == "Bone" ? .white : .yellow
+            if let fossil = plot.fossil, fossil.found {
+                return .green // or show fossil image
+            } else {
+                return .gray
+            }
+        case .foundItem:
+            return .yellow // if you're still using this case
         }
     }
 }
