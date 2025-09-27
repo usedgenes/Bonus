@@ -14,13 +14,6 @@ struct CollectionBookView: View {
         VStack(spacing: screenHeight*0.02) {
             ZStack{
                 HStack{
-                    Button(action: {
-                        print("Go Back")
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title)
-                            .foregroundColor(.brown)
-                    }
                     Spacer()
                 }
                 .frame(width: screenWidth*0.87)
@@ -67,16 +60,18 @@ struct CollectionBookView: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(2) // allows up to 2 lines
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.25)
                 
                 Image(fossil.picture)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 100)
+                    .frame(height: screenHeight*0.27*0.55)
                     .cornerRadius(10)
                 
                 Text(fossil.rarity.rawValue.uppercased())
                     .font(.system(size: 21))
                     .foregroundColor(.brown)
+                    .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.20)
                 
             } else {
                 Text("Undiscovered ...")
