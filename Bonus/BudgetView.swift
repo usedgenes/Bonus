@@ -117,6 +117,16 @@ struct BudgetView: View {
                 }
                 
             }
+//            
+//            Button(action: {
+//                
+//            }) {
+//                Text("Done")
+//                    .padding()
+//                    .cornerRadius()
+//                    .background(Color.white)
+//                    .shadow(radius: 8)
+//            }
             Spacer()
         }
         .padding()

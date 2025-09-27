@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct BonusApp: App {
+    @StateObject private var fossilCollection = FossilCollection(fossils: sharedFossils)
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(fossilCollection)
         }
     }
 }
