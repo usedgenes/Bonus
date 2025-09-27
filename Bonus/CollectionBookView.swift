@@ -38,10 +38,16 @@ struct CollectionBookView: View {
                         .scaledToFill()
                         .frame(width: screenWidth*0.75, height: screenHeight*0.18)
                 } else {
+                    Image("fullDinosaur")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                        .blur(radius: blurAmount)
+                    /*
                     Image("leftArm")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)*/
                 }
                 
                 // Fossil count
@@ -103,6 +109,14 @@ struct CollectionBookView: View {
                 .shadow(radius: 10)
             }
         }
+    }
+    
+    // Compute blur depending on foundCount
+    var blurAmount: CGFloat {
+        let minBlur: CGFloat = 2
+        let maxBlur: CGFloat = 10
+        let progress = CGFloat(fossilCollection.foundCount) / 17.0  // normalized 0...1
+        return maxBlur - (progress * (maxBlur - minBlur))
     }
     
     // MARK: - Fossil Card
