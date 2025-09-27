@@ -8,9 +8,9 @@
 import SwiftUI
 
 let sharedFossils: [Fossil] = [
-    Fossil(name: "Tricera Tooth", rarity: .common, picture: "tricera"),
-    Fossil(name: "Stego Spike", rarity: .uncommon, picture: "stego"),
-    Fossil(name: "Rex Jaw", rarity: .rare, picture: "trex"),
+    Fossil(name: "Skull", rarity: .legendary, picture: "skull"),
+    Fossil(name: "Neck", rarity: .legendary, picture: "neck"),
+    Fossil(name: "Left Claw", rarity: .rare, picture: "trex"),
     // add the rest of your fossils here
 ]
 
@@ -25,7 +25,6 @@ struct GameView: View {
     )
 
     var body: some View {
-
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
 
         ScrollView {
