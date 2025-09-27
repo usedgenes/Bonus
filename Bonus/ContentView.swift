@@ -6,20 +6,37 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
-    var body: some View {ß
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-            testing
+    var body: some View {
+        NavigationView {
+            List {
+                Section(header: Text("Budget")) {
+                    NavigationLink("Budget", destination: BudgetView())
+                }
+                Section(header: Text("Game")) {
+                    NavigationLink("Game", destination: GameView())
+
+                }
+            }
+            .navigationBarTitle("BONU$")
         }
-        .padding()
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
 #Preview {
     ContentView()
 }
+
+
+extension View {
+    func hideKeyboardWhenTappedAround() -> some View  {
+        return self.onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                            to: nil, from: nil, for: nil)
+        }
+    }
+}
+
