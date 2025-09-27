@@ -40,33 +40,54 @@ struct GameView: View {
 
     var body: some View {
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
+        ZStack {
+            // Background grass image
+            Image("grassBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
 
-        ScrollView {
-            LazyVGrid(columns: layout, spacing: 2) {
-                ForEach(0..<(rows * columns), id: \.self) { index in
-                    let row = index / columns
-                    let col = index % columns
-                    let plot = grid[row][col]
-                    
-                    ZStack {
-                        Rectangle()
-                            .fill(color(for: plot))
-                            .frame(height: 60)
+            VStack {
+                Spacer() // Optional: adds space above the grid
 
-                        if let fossil = plot.fossil, fossil.found {
-                            Image(fossil.picture)
+                LazyVGrid(columns: layout, spacing: 2) {
+                    ForEach(0..<(rows * columns), id: \.self) { index in
+                        let row = index / columns
+                        let col = index % columns
+                        let plot = grid[row][col]
+
+                        ZStack {
+                            Image("dirt")
                                 .resizable()
-                                .scaledToFit()
-                                .frame(width: 40, height: 40)
-                                .transition(.scale)
+                                .scaledToFill()
+                                .frame(width: 60, height: 60)
+                                .clipped()
+
+                            if let fossil = plot.fossil, fossil.found {
+                                Image(fossil.picture)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40, height: 40)
+                            }
+
+                            if plot.state == .dug && plot.fossil == nil {
+                                Color.black.opacity(0.3)
+                                    .frame(width: 60, height: 60)
+                                    .cornerRadius(4)
+                            }
+                        }
+                        .frame(width: 60, height: 60)
+                        .onTapGesture {
+                            dig(atRow: row, col: col)
                         }
                     }
-                    .onTapGesture {
-                        dig(atRow: row, col: col)
-                    }
                 }
+                .padding()
+                .background(Color.clear)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+                Spacer() // Optional: adds space below the grid
             }
-            .padding()
         }
         .onAppear {
             setupGrid()
