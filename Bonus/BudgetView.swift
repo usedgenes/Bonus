@@ -11,10 +11,15 @@ import Foundation
 import Combine
 
 class BudgetModel: ObservableObject {
-    @Published var monthlyBudget: Int = 0
+    @Published var monthlyBudget: Double = 3000.0
 }
 
+// @ 8 pm daily
+// userCoins += Int((BudgetModel.monthlyBudget / 30 - userSpending) * 0.1)
+
 struct PieMeterView: View {
+    @EnvironmentObject var budgetModel: BudgetModel
+
     var percentage: Double // from 0.0 to 1.0
     
     var arcColor: Color {
@@ -29,7 +34,7 @@ struct PieMeterView: View {
     }
     
     var amountLeft: Double {
-        monthlyBudget / 30.0 - userSpending
+        budgetModel.monthlyBudget / 30.0 - userSpending
     }
     
     var body: some View {
@@ -61,14 +66,14 @@ struct PieMeterView: View {
     }
 }
 
-var monthlyBudget = 3000.0
-var userSpending = 110.0
-private var showButtons = true
+//var monthlyBudget = 3000.0
+var userSpending = 90.0
 
 struct BudgetView: View {
     @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
     @GestureState private var dragOffset: CGFloat = 0
-    
+    @EnvironmentObject var budgetModel: BudgetModel
+
     var bottomHeight: CGFloat {
         return offsetY < 200 ? 400 : 200 // or pick your own sizes
     }
@@ -91,7 +96,6 @@ struct BudgetView: View {
     }
 
     var topOffset: CGFloat {
-//        let maxOffset: CGFloat = 50
         let middle = UIScreen.main.bounds.height * 0.725
         return (offsetY < middle) ? -(middle - offsetY) / 4 : 0
     }
@@ -107,15 +111,21 @@ struct BudgetView: View {
                     .bold()
                     .padding(.top, 125)
                 
-                PieMeterView(percentage: 1 - (userSpending / (monthlyBudget / 30)))
-                    .padding(.top, 30)
-                    .opacity(topOpacity)
+                if budgetModel.monthlyBudget != 0 {
+                    PieMeterView(percentage: 1 - (userSpending / (budgetModel.monthlyBudget / 30)))
+                        .padding(.top, 30)
+                        .opacity(topOpacity)
+                        .environmentObject(budgetModel)
+                } else {
+                    Text("Set your monthly budget in settings.")
+                        .font(Font.title)
+                }
                     
                 HStack {
                     VStack(alignment: .leading) {
                         Text("Daily Max:")
                             .font(.title3)
-                        Text("$\(monthlyBudget / 30, specifier: "%.2f")")
+                        Text("$\(budgetModel.monthlyBudget / 30, specifier: "%.2f")")
                             .font(.title2)
                             .bold()
                     }
@@ -134,57 +144,6 @@ struct BudgetView: View {
                 .padding()
                 .opacity(topOpacity)
                 
-                // this is the code for the calculator to enter the monthly budget if
-                // we ever need that again
-                //
-                //                Text("\(monthlyBudget, specifier: "%.2f")")
-                //                    .font(Font.largeTitle)
-                //
-                //                if showButtons {
-                //                    // Calculator keypad
-                //                    ForEach([[1, 2, 3], [4, 5, 6], [7, 8, 9]], id: \.self) { row in
-                //                        HStack {
-                //                            ForEach(row, id: \.self) { number in
-                //                                Button(action: {
-                //                                    monthlyBudget = monthlyBudget * 10 + number
-                //                                }) {
-                //                                    Text("\(number, specifier: "%.0f")")
-                //                                        .frame(width: 60, height: 60)
-                //                                        .background(Color.gray)
-                //                                        .foregroundColor(.white)
-                //                                        .cornerRadius(8)
-                //                                }
-                //                            }
-                //                        }
-                //                    }
-                //
-                //                    HStack {
-                //                        Button("0") {
-                //                            monthlyBudget = monthlyBudget * 10
-                //                        }
-                //                        .frame(width: 60, height: 60)
-                //                        .background(Color.gray)
-                //                        .foregroundColor(.white)
-                //                        .cornerRadius(8)
-                //
-                //                        Button("Clear") {
-                //                            monthlyBudget = 0
-                //                        }
-                //                        .frame(width: 130, height: 60)
-                //                        .background(Color.red)
-                //                        .foregroundColor(.white)
-                //                        .cornerRadius(8)
-                //                    }
-                //                }
-                //
-                //                Button(action: {
-                //                    showButtons.toggle()
-                //                }) {
-                //                    Text(showButtons ? "Done" : "Enter new monthly salary")
-                //                        .padding(3)
-                //                        .background(Color.white)
-                //                        .cornerRadius(8)
-                //                }
             }
             .scaleEffect(topScale)
             .offset(y: topOffset)
@@ -213,21 +172,17 @@ struct BudgetView: View {
                             // add money transactions here i guess
                             // this ui kinda sucks
                         }
-                            .padding(40)
+                            .frame(width: 350, height: 100, alignment: .center)
                             .background(Color.white)
                             .cornerRadius(8)
                             .shadow(radius: 3)
                             .opacity(botOpacity)
                             
-                        
                     }
                 }
-                .padding()
-                
             }
             .frame(maxWidth: .infinity)
-            .frame(height: .infinity)
-            .background(Color(red: 173/255, green: 216/255, blue: 230/255)) // change background color?
+            .background(Color(red: 173/255, green: 216/255, blue: 230/255)) // @maymay change background color?
             .cornerRadius(25)
             .shadow(radius: 10)
             .offset(y: offsetY + dragOffset)
