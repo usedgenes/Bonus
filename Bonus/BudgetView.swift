@@ -19,7 +19,7 @@ struct PieMeterView: View {
     
     var arcColor: Color {
         switch percentage {
-        case ..<0.2:
+        case ..<0.15:
             return .red
         case ..<0.5:
             return .yellow
@@ -29,7 +29,7 @@ struct PieMeterView: View {
     }
     
     var amountLeft: Double {
-        max(monthlyBudget / 30.0 - userSpending, 0)
+        monthlyBudget / 30.0 - userSpending
     }
     
     var body: some View {
@@ -49,7 +49,7 @@ struct PieMeterView: View {
 
             // Text inside
             VStack(spacing: 4) {
-                Text("$\(Int(amountLeft))")
+                Text(amountLeft < 0 ? "-$\(Int(amountLeft) * -1)" : "$\(Int(amountLeft))")
                     .font(.largeTitle)
                     .bold()
                 Text("left today")
@@ -62,11 +62,11 @@ struct PieMeterView: View {
 }
 
 var monthlyBudget = 3000.0
-var userSpending = 10.0
+var userSpending = 110.0
 private var showButtons = true
 
 struct BudgetView: View {
-    @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.7
+    @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
     @GestureState private var dragOffset: CGFloat = 0
     
     var bottomHeight: CGFloat {
@@ -87,13 +87,12 @@ struct BudgetView: View {
     }
     
     var botOpacity: Double {
-        let raw = 1 - topOpacity
-        return 0.5 + raw * 0.5
+        return 1 - topOpacity
     }
 
     var topOffset: CGFloat {
 //        let maxOffset: CGFloat = 50
-        let middle = UIScreen.main.bounds.height * 0.7
+        let middle = UIScreen.main.bounds.height * 0.725
         return (offsetY < middle) ? -(middle - offsetY) / 4 : 0
     }
     
