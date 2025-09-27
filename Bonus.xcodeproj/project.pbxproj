@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		442503CC2E87B78B006E361E /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
 		4495A62C2E877A680080E10D /* Bonus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bonus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA59D9502E87B7EC008A8829 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -30,13 +30,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		442503CE2E87B78B006E361E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		4495A6232E877A680080E10D = {
 			isa = PBXGroup;
 			children = (
@@ -49,6 +42,13 @@
 			isa = PBXGroup;
 			children = (
 				4495A62C2E877A680080E10D /* Bonus.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA59D9602E87B7EC008A8829 /* Products */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,8 +107,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 442503CE2E87B78B006E361E /* Products */;
-					ProjectRef = 442503CC2E87B78B006E361E /* Pods.xcodeproj */;
+					ProductGroup = DA59D9602E87B7EC008A8829 /* Products */;
+					ProjectRef = DA59D9502E87B7EC008A8829 /* Pods.xcodeproj */;
 				},
 			);
 			projectRoot = "";
