@@ -9,7 +9,7 @@ import SwiftUI
 
 let sharedFossils: [Fossil] = [
     Fossil(name: "Skull", rarity: .legendary, picture: "skull", found: true),
-    Fossil(name: "Neck", rarity: .legendary, picture: "neck", found: true),
+    Fossil(name: "Neck", rarity: .legendary, picture: "neck", found: false),
     Fossil(name: "Left Claw", rarity: .rare, picture: "leftClaw", found: true),
     Fossil(name: "Right Claw", rarity: .rare, picture: "rightClaw", found: true),
     Fossil(name: "Upper Tail", rarity: .rare, picture: "upperTail", found: true),
