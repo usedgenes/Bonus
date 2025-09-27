@@ -9,7 +9,6 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
-    @EnvironmentObject var customerTest: CustomerTest
     var body: some View {
         TabView {
             CollectionBookView()
@@ -42,6 +41,7 @@ struct ContentView: View {
         }
     }
 }
+
 #Preview {
     ContentView()
 }

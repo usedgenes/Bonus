@@ -12,9 +12,6 @@ import Combine
 struct BonusApp: App {
     @StateObject var customer = CustomerStore()
 
-    init() {
-    }
-
     var body: some Scene {
         WindowGroup {
             ContentView()
