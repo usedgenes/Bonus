@@ -11,7 +11,7 @@ struct CollectionBookView: View {
     
     var body: some View {
         
-        VStack(spacing: 20) {
+        VStack(spacing: screenHeight*0.02) {
             ZStack{
                 HStack{
                     Button(action: {
@@ -34,7 +34,7 @@ struct CollectionBookView: View {
             Image(systemName: "eraser")
                 .resizable()
                 .scaledToFit()
-                .frame(width: screenWidth*0.75, height: screenHeight*0.2)
+                .frame(width: screenWidth*0.75, height: screenHeight*0.18)
             
             Text("Brachiosaurus Fossils")
                 .font(.title2)
@@ -44,9 +44,9 @@ struct CollectionBookView: View {
             
             ScrollView {
                 
-                VStack(spacing: 20) { // spacing between HStacks
+                VStack(spacing: screenHeight*0.02) { // spacing between HStacks
                     ForEach(0..<9, id: \.self) { rowIndex in
-                        HStack(spacing: 20) { // spacing between images
+                        HStack(spacing: screenHeight*0.02) { // spacing between images
                             createFossilCard(fossil: sharedFossils[rowIndex*2])
                             createFossilCard(fossil: sharedFossils[rowIndex*2+1])
                         }
@@ -59,7 +59,7 @@ struct CollectionBookView: View {
     }
     
     func createFossilCard(fossil: Fossil) -> some View {
-        VStack(spacing: 10) {
+        VStack(spacing: screenHeight*0.01) {
             if fossil.found {
                 Text(fossil.name)
                     .font(.title3)
@@ -75,7 +75,7 @@ struct CollectionBookView: View {
                     .cornerRadius(10)
                 
                 Text(fossil.rarity.rawValue.uppercased())
-                    .font(.subheadline)
+                    .font(.system(size: 21))
                     .foregroundColor(.brown)
                 
             } else {
@@ -86,9 +86,9 @@ struct CollectionBookView: View {
         }
         
         .padding()
-        .frame(width: screenWidth*0.35, height: screenHeight*0.25)
+        .frame(width: screenWidth*0.41, height: screenHeight*0.27)
         .background(fossilCardColor(fossil: fossil))
-        .cornerRadius(15)
+        .cornerRadius(8)
         
     }
     
