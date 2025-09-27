@@ -24,4 +24,9 @@ class FossilCollection: ObservableObject {
     var foundFossils: [Fossil] {
         fossils.filter { $0.found }
     }
+    
+    var foundCount: Int {
+        fossils.filter { $0.found }.count
+    }
+    
 }
