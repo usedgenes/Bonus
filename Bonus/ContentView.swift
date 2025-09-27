@@ -10,33 +10,27 @@ import UIKit
 
 struct ContentView: View {
     var body: some View {
-        NavigationStack {
-            ZStack {
-                
-                VStack {
-                    HStack {
-                        NavigationLink(destination: CollectionBookView()) {
-                            Image(systemName: "book.closed.fill")
-                                .font(.largeTitle)
-                        }
-                        
-                        Spacer()
-                        
-                        NavigationLink(destination: SettingsView()) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.largeTitle)
-                        }
-                    }
-                    
-//                    Image("dirt") // this is a placeholder image lol
-//                        .resizable()
-//                        .scaledToFill()
-//                        .ignoresSafeArea()
-                    
-                    Spacer()
+        TabView {
+            CollectionBookView()
+                .tabItem {
+                    Image(systemName: "book.closed.fill")
+                    Text("Collection")
                 }
-                .padding()
-            }
+            BudgetView()
+                .tabItem {
+                    Image(systemName: "dollarsign.circle")
+                    Text("Budget")
+                }
+            GameView()
+                .tabItem {
+                    Image(systemName: "gamecontroller")
+                    Text("Explore")
+                }
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "gearshape.fill")
+                    Text("Settings")
+                }
         }
     }
 }
