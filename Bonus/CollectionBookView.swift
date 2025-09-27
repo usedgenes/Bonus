@@ -3,7 +3,7 @@ import SwiftUI
 
 struct CollectionBookView: View {
     
-    @State private var counter = 0
+    @EnvironmentObject var fossilCollection: FossilCollection
     
     
     
@@ -67,7 +67,7 @@ struct CollectionBookView: View {
             
                 .frame(width: screenWidth*0.75, height: screenHeight*0.2)
             
-            Text("Collected Fossils")
+            Text("Brachiosaurus Fossils")
             
                 .font(.title2)
             
