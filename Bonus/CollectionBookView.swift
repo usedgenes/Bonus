@@ -50,8 +50,8 @@ struct CollectionBookView: View {
                 VStack(spacing: screenHeight*0.02) { // spacing between HStacks
                     ForEach(0..<9, id: \.self) { rowIndex in
                         HStack(spacing: screenHeight*0.02) { // spacing between images
-                            createFossilCard(fossil: sharedFossils[rowIndex*2])
-                            createFossilCard(fossil: sharedFossils[rowIndex*2+1])
+                            createFossilCard(fossil: fossilCollection.getFossils()[rowIndex*2])
+                            createFossilCard(fossil: fossilCollection.getFossils()[rowIndex*2+1])
                         }
                     }
                 }

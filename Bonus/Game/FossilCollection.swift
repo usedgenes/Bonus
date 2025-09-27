@@ -29,4 +29,8 @@ class FossilCollection: ObservableObject {
         fossils.filter { $0.found }.count
     }
     
+    func getFossils() -> [Fossil] {
+        return fossils
+    }
+    
 }
