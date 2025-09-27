@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+let sharedFossils: [Fossil] = [
+    Fossil(name: "Skull", rarity: .legendary, picture: "skull"),
+    Fossil(name: "Neck", rarity: .legendary, picture: "neck"),
+    Fossil(name: "Left Claw", rarity: .rare, picture: "trex"),
+    // add the rest of your fossils here
+]
+
 struct GameView: View {
     let columns = 6
     let rows = 6
@@ -17,7 +24,6 @@ struct GameView: View {
     )
 
     var body: some View {
-
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
 
         ScrollView {
@@ -44,12 +50,7 @@ struct GameView: View {
 
     func setupGrid() {
         // Step 1: Define your unique fossils
-        let fossils: [Fossil] = [
-            Fossil(name: "Tricera Tooth", rarity: .common, picture: "tricera"),
-            Fossil(name: "Stego Spike", rarity: .uncommon, picture: "stego"),
-            Fossil(name: "Rex Jaw", rarity: .rare, picture: "trex"),
-            // Add 17 more unique fossils here...
-        ]
+        let fossils = sharedFossils
 
         // Step 2: Generate all positions in the grid
         let rows = 6
@@ -89,10 +90,12 @@ struct GameView: View {
         var plot = grid[row][col]
         plot.state = .dug
 
-        if var fossil = plot.fossil {
-            fossil.found = true
-            plot.fossil = fossil
-            // You could trigger a reward or display animation here
+        if let fossil = plot.fossil, !fossil.found {
+            fossilCollection.markFound(fossilName: fossil.name)
+            // Update the plot's fossil as found
+            var updatedFossil = fossil
+            updatedFossil.found = true
+            plot.fossil = updatedFossil
         }
 
         grid[row][col] = plot
@@ -128,5 +131,6 @@ func color(for state: PlotState) -> Color {
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {
         GameView()
+            .environmentObject(FossilCollection(fossils: sharedFossils))
     }
 }
