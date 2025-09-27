@@ -11,8 +11,8 @@ import Combine
 @main
 struct BonusApp: App {
     @StateObject var customer = CustomerStore()
+    @StateObject var budgetModel = BudgetModel()
     @StateObject private var fossilCollection = FossilCollection(fossils: sharedFossils)
-    @EnvironmentObject var budgetModel: BudgetModel
     var body: some Scene {
         WindowGroup {
             ContentView()
