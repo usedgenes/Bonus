@@ -72,7 +72,7 @@ struct GameView: View {
                             .frame(maxWidth: .infinity)
                             .padding(8)
                             .background(Color.black.opacity(0.7))
-                            .opacity(isFlashing ? 1 : 0.3)
+                            .opacity(isFlashing ? 1 : 1)
                             .animation(
                                 Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true),
                                 value: isFlashing
