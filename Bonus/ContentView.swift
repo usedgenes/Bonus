@@ -20,21 +20,21 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "dollarsign.circle")
                     Text("Budget")
-                }
-            GameView()
-                .tabItem {
-                    Image(systemName: "gamecontroller")
-                    Text("Explore")
-                }
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gearshape.fill")
-                    Text("Settings")
+                    
+                    GameView()
+                        .tabItem {
+                            Image(systemName: "gamecontroller")
+                            Text("Explore")
+                        }
+                    SettingsView()
+                        .tabItem {
+                            Image(systemName: "gearshape.fill")
+                            Text("Settings")
+                        }
                 }
         }
     }
 }
-
 #Preview {
     ContentView()
 }
