@@ -8,10 +8,25 @@
 import SwiftUI
 
 let sharedFossils: [Fossil] = [
-    Fossil(name: "Skull", rarity: .legendary, picture: "skull"),
-    Fossil(name: "Neck", rarity: .legendary, picture: "neck"),
-    Fossil(name: "Left Claw", rarity: .rare, picture: "trex"),
-    // add the rest of your fossils here
+    Fossil(name: "Skull", rarity: .legendary, picture: "skull", found: true),
+    Fossil(name: "Neck", rarity: .legendary, picture: "neck", found: false),
+    Fossil(name: "Left Claw", rarity: .rare, picture: "leftClaw", found: true),
+    Fossil(name: "Right Claw", rarity: .rare, picture: "rightClaw", found: true),
+    Fossil(name: "Upper Tail", rarity: .rare, picture: "upperTail", found: true),
+    Fossil(name: "Lower Tail", rarity: .rare, picture: "lowerTail", found: true),
+    Fossil(name: "Upper Left Ribcage", rarity: .uncommon, picture:"upperLeftRib", found: true),
+    Fossil(name: "Upper Right Ribcage", rarity: .uncommon, picture:"upperRightRib", found: true),
+    Fossil(name: "Lower Left Ribcage", rarity: .uncommon, picture:"lowerLeftRib", found: true),
+    Fossil(name: "Lower Right Ribcage", rarity: .uncommon, picture:"lowerRightRib", found: true),
+    Fossil(name: "Left Thighbone", rarity: .uncommon, picture:"leftThigh", found: true),
+    Fossil(name: "Right Thighbone", rarity: .uncommon, picture: "rightThigh", found: true),
+    Fossil(name: "Left Shinbone", rarity: .common, picture: "leftShinbone", found: true),
+    Fossil(name: "Right Shinbone", rarity: .common, picture: "rightShinbone", found: true),
+    Fossil(name: "Left Foot", rarity: .common, picture: "leftFoot", found: true),
+    Fossil(name: "Right Foot", rarity: .common, picture: "rightFoot", found: true),
+
+    Fossil(name: "Left Arm", rarity: .common, picture: "leftArm", found: true),
+    Fossil(name: "Right Arm", rarity: .common, picture: "rightArm", found: true)
 ]
 
 struct GameView: View {
@@ -26,23 +41,54 @@ struct GameView: View {
 
     var body: some View {
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
+        ZStack {
+            // Background grass image
+            Image("grassBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
 
-        ScrollView {
-            LazyVGrid(columns: layout, spacing: 2) {
-                ForEach(0..<(rows * columns), id: \.self) { index in
-                    let row = index / columns
-                    let col = index % columns
-                    let plot = grid[row][col]
-                    
-                    Rectangle()
-                        .fill(color(for: plot))
-                        .frame(height: 30)
+            VStack {
+                Spacer() // Optional: adds space above the grid
+
+                LazyVGrid(columns: layout, spacing: 2) {
+                    ForEach(0..<(rows * columns), id: \.self) { index in
+                        let row = index / columns
+                        let col = index % columns
+                        let plot = grid[row][col]
+
+                        ZStack {
+                            Image("dirt")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 60, height: 60)
+                                .clipped()
+
+                            if let fossil = plot.fossil, fossil.found {
+                                Image(fossil.picture)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40, height: 40)
+                            }
+
+                            if plot.state == .dug && plot.fossil == nil {
+                                Color.black.opacity(0.3)
+                                    .frame(width: 60, height: 60)
+                                    .cornerRadius(4)
+                            }
+                        }
+                        .frame(width: 60, height: 60)
                         .onTapGesture {
                             dig(atRow: row, col: col)
                         }
+                    }
                 }
+                .padding()
+                .background(Color.clear)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+                Spacer() // Optional: adds space below the grid
             }
-            .padding()
         }
         .onAppear {
             setupGrid()
@@ -100,7 +146,9 @@ struct GameView: View {
             plot.fossil = updatedFossil
         }
 
-        grid[row][col] = plot
+        withAnimation {
+            grid[row][col] = plot
+        }
         GridStorage.save(grid: grid)
     }
 
