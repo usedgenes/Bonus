@@ -170,13 +170,12 @@ open class AccountRequest {
         
         let nseClient = NSEClient.sharedInstance
         var request = nseClient.makeRequest(buildRequestUrl(), requestType: self.requestType)
-        
         do {
             request.httpBody = try JSONEncoder().encode(newAccount)
         } catch let error as NSError {
             throw error
         }
-        
+
         guard let data = try await nseClient.loadDataFromURL(request) else { return nil }
         let accountPostResponse = try JSONDecoder().decode(AccountPostResponse.self, from: data)
         return accountPostResponse
@@ -217,5 +216,18 @@ open class AccountRequest {
         }
         let accountDeleteResponse = try JSONDecoder().decode(AccountDeleteResponse.self, from: data)
         return accountDeleteResponse
+    }
+    
+    open func deleteAccounts() async throws {
+        requestType = HTTPType.DELETE
+
+        let nseClient = NSEClient.sharedInstance
+        let url = "http://api.nessieisreal.com/data?type=Accounts&key=\(nseClient.getKey())"
+        var request = nseClient.makeRequest(url, requestType: requestType)
+
+        // Perform the request (204 → success, no content to decode)
+        _ = try await nseClient.loadDataFromURL(request)
+
+        print("✅ All customers deleted successfully")
     }
 }

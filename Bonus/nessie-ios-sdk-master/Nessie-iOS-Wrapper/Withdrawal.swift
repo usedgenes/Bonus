@@ -8,6 +8,46 @@
 
 import Foundation
 
+public enum TransferType: String, Codable {
+    case P2P = "p2p"
+    case Deposit = "deposit"
+    case Withdrawal = "withdrawal"
+    case Unknown
+}
+
+public enum TransferStatus: String, Codable {
+    case Pending = "pending"
+    case Cancelled = "cancelled"
+    case Completed = "completed"
+    case Executed = "executed"
+    case Unknown
+}
+
+public enum TransactionMedium : String, Codable {
+    case Balance = "balance"
+    case Rewards = "rewards"
+    case Unknown
+}
+
+public enum TransactionType : String, Decodable {
+    case P2P = "p2p"
+    case Deposit = "deposit"
+    case Withdrawal = "withdrawal"
+    case Unknown
+}
+
+public enum TransactionStatus : String, Codable {
+    case Pending = "pending"
+    case Cancelled = "cancelled"
+    case Completed = "completed"
+    case Executed = "executed"
+    case Unknown
+}
+
+enum DateFormattingError: Error {
+    case notADate
+}
+
 public struct Withdrawal: Decodable {
     public var withdrawalId: String
     public var type: TransferType
@@ -38,7 +78,7 @@ public struct WithdrawalPostData: Encodable {
         self.medium = medium
         self.transactionDate = transactionDate
         self.amount = amount
-        self.status = status
+        self.status = TransferStatus.Completed
         self.description = description
     }
     
@@ -48,6 +88,7 @@ public struct WithdrawalPostData: Encodable {
         case transactionDate = "transaction_date"
     }
 }
+
 
 public struct WithdrawalPostResponse: Decodable {
     public var code: Int?
@@ -108,10 +149,6 @@ open class WithdrawalRequest {
         return requestString
     }
     
-    
-    // MARK: API Requests
-    
-    // GET /accounts/{id}/withdrawals
     open func getWithdrawalsFromAccountId(_ accountId: String) async throws -> [Withdrawal]? {
         requestType = HTTPType.GET
         self.accountId = accountId
@@ -123,7 +160,6 @@ open class WithdrawalRequest {
         return withdrawals
     }
     
-    // GET /withdrawals/{id}
     open func getWithdrawal(_ withdrawalId: String) async throws -> Withdrawal? {
         requestType = HTTPType.GET
         self.withdrawalId = withdrawalId

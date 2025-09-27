@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import Combine
 
 @main
 struct BonusApp: App {
+    @StateObject var customer = CustomerStore()
     @StateObject private var fossilCollection = FossilCollection(fossils: sharedFossils)
     @EnvironmentObject var budgetModel: BudgetModel
     var body: some Scene {
@@ -16,6 +18,7 @@ struct BonusApp: App {
             ContentView()
                 .environmentObject(fossilCollection)
                 .environmentObject(budgetModel)
+                .environmentObject(customer)
         }
     }
 }
