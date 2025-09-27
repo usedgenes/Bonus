@@ -38,3 +38,4 @@ struct BudgetView_Previews: PreviewProvider {
         BudgetView()
     }
 }
+

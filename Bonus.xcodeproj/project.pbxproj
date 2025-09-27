@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		442503CC2E87B78B006E361E /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
 		4495A62C2E877A680080E10D /* Bonus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bonus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -29,6 +30,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		442503CE2E87B78B006E361E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		4495A6232E877A680080E10D = {
 			isa = PBXGroup;
 			children = (
@@ -97,6 +105,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4495A62D2E877A680080E10D /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 442503CE2E87B78B006E361E /* Products */;
+					ProjectRef = 442503CC2E87B78B006E361E /* Pods.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				4495A62B2E877A680080E10D /* Bonus */,

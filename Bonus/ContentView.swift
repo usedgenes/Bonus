@@ -9,29 +9,34 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+    @StateObject private var api = NessieAPI()
+    
     var body: some View {
-        TabView {
-            CollectionBookView()
-                .tabItem {
-                    Image(systemName: "book.closed.fill")
-                    Text("Collection")
+        NavigationView {
+            List {
+                Section(header: Text("Budget")) {
+                    NavigationLink("Budget", destination: BudgetView())
                 }
-            BudgetView()
-                .tabItem {
-                    Image(systemName: "dollarsign.circle")
-                    Text("Budget")
+                Section(header: Text("Game")) {
+                    NavigationLink("Game", destination: GameView())
+                    
                 }
-            GameView()
-                .tabItem {
-                    Image(systemName: "gamecontroller")
-                    Text("Explore")
+            }
+            .navigationBarTitle("BONU$")
+            List(api.atms) { atm in
+                VStack(alignment: .leading) {
+                    Text(atm.name)
+                        .font(.headline)
+                    Text("\(atm.address), \(atm.city), \(atm.state) \(atm.zip)")
+                        .font(.subheadline)
                 }
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gearshape.fill")
-                    Text("Settings")
-                }
+            }
+            .navigationTitle("ATMs")
+            .onAppear {
+                api.fetchATMLocations()
+            }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
