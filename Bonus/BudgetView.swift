@@ -6,135 +6,225 @@
 //
 
 import SwiftUI
+import Foundation
+import Combine
 
-struct BudgetView: View {
-    @State private var monthlyBudget = 0
-//    @Binding var isShowingCalculator: Bool
+class BudgetModel: ObservableObject {
+    @Published var monthlyBudget: Int = 0
+}
 
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Budget")
-                .font(.largeTitle)
-                .foregroundColor(.blue)
-
-            Text("Monthly Budget: \(monthlyBudget)")
-                .font(.title2)
-            HStack {
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 1
-                }) {
-                    Text("1")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 2
-                }) {
-                    Text("2")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 3
-                }) {
-                    Text("3")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-            }
-            
-            HStack {
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 4
-                }) {
-                    Text("4")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 5
-                }) {
-                    Text("5")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 6
-                }) {
-                    Text("6")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-            }
-            
-            HStack {
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 7
-                }) {
-                    Text("7")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 8
-                }) {
-                    Text("8")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    monthlyBudget = monthlyBudget * 10 + 9
-                }) {
-                    Text("9")
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-            }
-//            
-//            Button(action: {
-//                
-//            }) {
-//                Text("Done")
-//                    .padding()
-//                    .cornerRadius()
-//                    .background(Color.white)
-//                    .shadow(radius: 8)
-//            }
-            Spacer()
+struct PieMeterView: View {
+    var percentage: Double // from 0.0 to 1.0
+    
+    var arcColor: Color {
+        switch percentage {
+        case ..<0.2:
+            return .red
+        case ..<0.5:
+            return .yellow
+        default:
+            return .green
         }
-        .padding()
+    }
+    
+    var amountLeft: Double {
+        max(monthlyBudget / 30.0 - userSpending, 0)
+    }
+    
+    var body: some View {
+        ZStack {
+            // Background circle (gray base)
+            Circle()
+                .stroke(Color.gray.opacity(0.2), lineWidth: 30)
+
+            // Foreground arc (progress)
+            Circle()
+                .trim(from: 0, to: percentage)
+                .stroke(
+                    arcColor,
+                    style: StrokeStyle(lineWidth: 30, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90)) // Rotate so it starts at top
+
+            // Text inside
+            VStack(spacing: 4) {
+                Text("$\(Int(amountLeft))")
+                    .font(.largeTitle)
+                    .bold()
+                Text("left today")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+        }
+        .frame(width: 200, height: 200)
     }
 }
 
-struct BudgetView_Previews: PreviewProvider {
-    static var previews: some View {
-        BudgetView()
+var monthlyBudget = 3000.0
+var userSpending = 10.0
+private var showButtons = true
+
+struct BudgetView: View {
+    @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.7
+    @GestureState private var dragOffset: CGFloat = 0
+    
+    var bottomHeight: CGFloat {
+        return offsetY < 200 ? 400 : 200 // or pick your own sizes
     }
+    
+    var topScale: CGFloat {
+        let minScale: CGFloat = 0.85
+        let maxOffset: CGFloat = UIScreen.main.bounds.height * 0.3
+        let progress = min(max((offsetY - 100) / maxOffset, 0), 1)
+        return 1 - (1 - minScale) * (1 - progress)
+    }
+
+    var topOpacity: Double {
+        let maxOffset: CGFloat = UIScreen.main.bounds.height * 0.3
+        let progress = min(max((offsetY - 100) / maxOffset, 0), 1)
+        return Double(progress)
+    }
+
+    var topOffset: CGFloat {
+//        let maxOffset: CGFloat = 50
+        let middle = UIScreen.main.bounds.height * 0.7
+        return (offsetY < middle) ? -(middle - offsetY) / 4 : 0
+    }
+    
+    var body: some View {
+        ZStack(alignment: .top) {
+            Color(Color.white)
+                .ignoresSafeArea()
+            
+            VStack {
+                Text("Today's Remaining Money:")
+                    .font(.title)
+                    .bold()
+                    .padding(.top, 125)
+                
+                PieMeterView(percentage: 1 - (userSpending / (monthlyBudget / 30)))
+                    .padding(.top, 30)
+                    .opacity(topOpacity)
+                    
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Daily Max:")
+                            .font(.title3)
+                        Text("$\(monthlyBudget / 30, specifier: "%.2f")")
+                            .font(.title2)
+                            .bold()
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing) {
+                        Text("Money Spent Today:")
+                            .font(.title3)
+                        Text("$\(userSpending, specifier: "%.2f")")
+                            .font(.title2)
+                            .bold()
+                    }
+                }
+                .padding(.top, 30)
+                .padding()
+                .opacity(topOpacity)
+                
+                                
+                //                Text("\(monthlyBudget, specifier: "%.2f")")
+                //                    .font(Font.largeTitle)
+                //
+                //                if showButtons {
+                //                    // Calculator keypad
+                //                    ForEach([[1, 2, 3], [4, 5, 6], [7, 8, 9]], id: \.self) { row in
+                //                        HStack {
+                //                            ForEach(row, id: \.self) { number in
+                //                                Button(action: {
+                //                                    monthlyBudget = monthlyBudget * 10 + number
+                //                                }) {
+                //                                    Text("\(number, specifier: "%.0f")")
+                //                                        .frame(width: 60, height: 60)
+                //                                        .background(Color.gray)
+                //                                        .foregroundColor(.white)
+                //                                        .cornerRadius(8)
+                //                                }
+                //                            }
+                //                        }
+                //                    }
+                //
+                //                    HStack {
+                //                        Button("0") {
+                //                            monthlyBudget = monthlyBudget * 10
+                //                        }
+                //                        .frame(width: 60, height: 60)
+                //                        .background(Color.gray)
+                //                        .foregroundColor(.white)
+                //                        .cornerRadius(8)
+                //
+                //                        Button("Clear") {
+                //                            monthlyBudget = 0
+                //                        }
+                //                        .frame(width: 130, height: 60)
+                //                        .background(Color.red)
+                //                        .foregroundColor(.white)
+                //                        .cornerRadius(8)
+                //                    }
+                //                }
+                //
+                //                Button(action: {
+                //                    showButtons.toggle()
+                //                }) {
+                //                    Text(showButtons ? "Done" : "Enter new monthly salary")
+                //                        .padding(3)
+                //                        .background(Color.white)
+                //                        .cornerRadius(8)
+                //                }
+            }
+            .scaleEffect(topScale)
+            .offset(y: topOffset)
+            
+            VStack {
+                Capsule()
+                    .frame(width: 40, height: 6)
+                    .foregroundColor(.gray)
+                    .padding(.top, 8)
+                
+                Text("Recent Transactions:")
+                    .font(Font.title.bold())
+                
+                // add money transactions here
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: .infinity)
+            .background(Color(red: 173/255, green: 216/255, blue: 230/255)) // change background color?
+            .cornerRadius(25)
+            .shadow(radius: 10)
+            .offset(y: offsetY + dragOffset)
+            .onTapGesture {
+                withAnimation {
+                    offsetY = offsetY > 200 ? 100 : UIScreen.main.bounds.height * 0.7
+                }
+            }
+            .gesture(
+                DragGesture()
+                    .updating($dragOffset) { value, state, _ in
+                        state = value.translation.height
+                    }
+                    .onEnded { value in
+                        // Snap to top or bottom depending on drag
+                        let newOffset = offsetY + value.translation.height
+                        let middle = UIScreen.main.bounds.height * 0.5
+                        withAnimation(.easeInOut) {
+                            offsetY = newOffset < middle ? 100 : UIScreen.main.bounds.height * 0.4
+                            }
+                        }
+                )
+                .animation(.easeInOut, value: offsetY)
+        }
+    }
+}
+
+#Preview {
+    BudgetView()
 }

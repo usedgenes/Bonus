@@ -8,19 +8,23 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject var budgetModel: BudgetModel
+    
     var body: some View {
-        VStack {
-            Text("Settings")
-                .font(Font.largeTitle)
+        VStack(spacing: 20) {
+            Text("Budget")
+                .font(.largeTitle)
+                .foregroundColor(.blue)
             
-            Spacer()
-                
+            Text("Monthly Salary: \(monthlyBudget, specifier: "%.2f")")
+                .font(.title2)
+            
         }
-        .padding()
-        
     }
 }
 
-#Preview {
-    SettingsView()
-}
+    struct SettingsView_Previews: PreviewProvider {
+        static var previews: some View {
+            SettingsView()
+        }
+    }
