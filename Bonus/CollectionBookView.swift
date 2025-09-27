@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CollectionBookView: View {
     
@@ -31,20 +32,26 @@ struct CollectionBookView: View {
                 }
                 
                 // Main image
-                if fossilCollection.foundCount >= 18 {
-                    Image("fullDinosaur")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
-                } else {
-                    Image("leftArm")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: screenWidth*0.75, height: screenHeight*0.18)
-                }
+
+                    if fossilCollection.foundCount >= 18 {
+                        Image("fullDinosaur")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                    } else {
+                        ZStack {
+                            Image("fullDinosaur")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: screenWidth*0.75, height: screenHeight*0.18)
+                                .blur(radius: blurAmount)
+                            
+                            Text("Discover all fossils to unlock the dinosaur!")
+                        }
+                    }
                 
                 // Fossil count
-                Text("Brachiosaurus Fossils (\(fossilCollection.foundCount)/18)")
+                Text("Ceratosaurus Fossils (\(fossilCollection.foundCount)/18)")
                     .font(.title2)
                     .foregroundColor(.black)
                 
@@ -80,7 +87,7 @@ struct CollectionBookView: View {
                         .bold()
                         .foregroundColor(.white)
                     
-                    Text("You found all 18 Brachiosaurus fossils!")
+                    Text("You found all 18 Ceratosaurus fossils!")
                         .font(.title2)
                         .foregroundColor(.white)
                     
@@ -104,6 +111,14 @@ struct CollectionBookView: View {
         }
     }
     
+    // Compute blur depending on foundCount
+    var blurAmount: CGFloat {
+        let minBlur: CGFloat = 2
+        let maxBlur: CGFloat = 10
+        let progress = CGFloat(fossilCollection.foundCount) / 17.0  // normalized 0...1
+        return maxBlur - (progress * (maxBlur - minBlur))
+    }
+    
     // MARK: - Fossil Card
     func createFossilCard(fossil: Fossil) -> some View {
         // Compute text outside the VStack
@@ -122,11 +137,15 @@ struct CollectionBookView: View {
                     .frame(width: screenWidth*0.37, height: screenHeight*0.27*0.27)
                 
                 // Image
-                Image(fossil.picture)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: screenHeight*0.27*0.53)
-                    .cornerRadius(10)
+                if let fossilImage = UIImage(named: fossil.picture)?.removingWhiteBackground() {
+                    Image(uiImage: fossilImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: screenHeight*0.27*0.53)
+                } else {
+                    Text("Image not found")
+                }
+
                 
                 // Rarity
                 Text(rarityText)
@@ -148,6 +167,23 @@ struct CollectionBookView: View {
         .frame(width: screenWidth*0.41, height: screenHeight*0.27)
         .background(fossil.rarityColor.opacity(0.6))
         .cornerRadius(8)
+    }
+}
+
+extension UIImage {
+    func removingWhiteBackground() -> UIImage? {
+        guard let rawImage = self.cgImage else { return nil }
+        
+        // Mask out white (tweak these numbers if needed)
+        let colorMasking: [CGFloat] = [200, 255, 200, 255, 200, 255]
+        
+        UIGraphicsBeginImageContext(self.size)
+        if let masked = rawImage.copy(maskingColorComponents: colorMasking) {
+            UIImage(cgImage: masked).draw(in: CGRect(origin: .zero, size: self.size))
+        }
+        let result = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return result
     }
 }
 

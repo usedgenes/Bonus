@@ -32,6 +32,7 @@ let sharedFossils: [Fossil] = [
 struct GameView: View {
     @Binding var selectedTab: Int
     @State private var foundFossil: Fossil? = nil
+    @State private var isFlashing = false
     @EnvironmentObject var fossilCollection: FossilCollection
     enum GameNavigation: Hashable {
         case collectionBook
@@ -56,28 +57,34 @@ struct GameView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 12) {
-                    Spacer() // Optional: adds space above the grid
+                    Spacer()
                     
                     VStack(spacing: 4) {
-                            Text("Brachiosaurus Dig Site: \(completionPercentage())% complete")
-                                .font(.headline)
-                                .foregroundColor(.white)
+                        Text("Brachiosaurus Dig Site: \(completionPercentage())% complete")
+                            .font(.title)
+                            .bold()
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
 
-                            Text("Click to dig (costs 10 coins)")
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                    .padding()
-                    .background(Color.black.opacity(0.5))
-                    .cornerRadius(8)
-                    
-                    Button("Reset Grid") {
-                        resetGrid()
+                        Text("Click to dig (costs 10🟡)")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.8))
+                            .frame(maxWidth: .infinity)
+                            .padding(8)
+                            .background(Color.black.opacity(0.7))
+                            .opacity(isFlashing ? 1 : 1)
+                            .animation(
+                                Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                                value: isFlashing
+                            )
                     }
-                    .padding()
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+                    .padding(.top)
+                    .onAppear {
+                        isFlashing = true
+                    }
+                    
                     
                     LazyVGrid(columns: layout, spacing: 2) {
                         ForEach(0..<(rows * columns), id: \.self) { index in
@@ -93,10 +100,17 @@ struct GameView: View {
                                     .clipped()
                                 
                                 if let fossil = plot.fossil, fossil.found {
-                                    Image("bone")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 30, height: 30)
+                                    if let fossilImage = UIImage(named: fossil.picture)?.removingWhiteBackground() {
+                                        Image(uiImage: fossilImage)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 40, height: 40)
+                                    } else {
+                                        Image(fossil.picture) // fallback if the custom UIImage fails
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 40, height: 40)
+                                    }
                                 }
                                 
                                 if plot.state == .dug {
@@ -117,7 +131,15 @@ struct GameView: View {
                     .background(Color.clear)
                     .frame(maxWidth: .infinity, alignment: .center)
                     
-                    Spacer() // Optional: adds space below the grid
+                    Button("Reset Grid") {
+                        resetGrid()
+                    }
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    
+                    Spacer()
                 }
                 if let fossil = foundFossil {
                     ZStack {
@@ -126,10 +148,17 @@ struct GameView: View {
                             .ignoresSafeArea()
                         
                         VStack(spacing: 16) {
-                            Image(fossil.picture)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
+                            if let fossilImage = UIImage(named: fossil.picture)?.removingWhiteBackground() {
+                                Image(uiImage: fossilImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                            } else {
+                                Image(fossil.picture)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                            }
                             
                             Text(fossil.name)
                                 .font(.title)
@@ -153,7 +182,7 @@ struct GameView: View {
                         .padding()
                     }
                     .transition(.scale)
-                    .zIndex(1) // Ensure it appears on top
+                    .zIndex(1)
                 }
             }
             .navigationDestination(for: GameNavigation.self) { destination in
@@ -193,10 +222,10 @@ struct GameView: View {
         setupGrid()
     }
     func setupGrid() {
-        // Step 1: Define your unique fossils
+        //Define unique fossils
         let fossils = sharedFossils
 
-        // Step 2: Generate all positions in the grid
+        //Generate all positions in the grid
         let rows = 6
         
         let columns = 6
@@ -207,11 +236,11 @@ struct GameView: View {
             }
         }
 
-        // Step 3: Shuffle fossils and positions
+        //Shuffle fossils and positions
         let shuffledFossils = fossils.shuffled()
         let shuffledPositions = positions.shuffled()
 
-        // Step 4: Create grid with fossils placed at random positions
+        //Create grid with fossils placed at random positions
         var newGrid: [[Plot]] = Array(
             repeating: Array(repeating: Plot(state: .untouched, fossil: nil), count: columns),
             count: rows
@@ -222,7 +251,7 @@ struct GameView: View {
             newGrid[pos.row][pos.col].fossil = shuffledFossils[i]
         }
 
-        // Step 5: Set it as your current grid and save it
+        //Set it as your current grid and save it
         grid = newGrid
         GridStorage.save(grid: grid)
     }
@@ -241,7 +270,7 @@ struct GameView: View {
             updatedFossil.found = true
             plot.fossil = updatedFossil
 
-            // Show popup with discovered fossil
+            //Show popup with discovered fossil
             foundFossil = updatedFossil
         }
 
@@ -252,22 +281,21 @@ struct GameView: View {
         GridStorage.save(grid: grid)
 
         if fossilCollection.foundCount == sharedFossils.count {
-            selectedTab = 0 // Switch to the Collection tab (tag 0)
-        }
-    }
-
-    func color(for plot: Plot) -> Color {
-        switch plot.state {
-        case .untouched:
-            return .brown
-        case .dug:
-            if let fossil = plot.fossil, fossil.found {
-                return .green // or show fossil image
-            } else {
-                return .gray
+            // Automatically dig all remaining untouched plots
+            for r in 0..<rows {
+                for c in 0..<columns {
+                    if grid[r][c].state == .untouched {
+                        grid[r][c].state = .dug
+                    }
+                }
             }
-        case .foundItem:
-            return .yellow // if you're still using this case
+
+            // Save updated grid after auto-digging
+            GridStorage.save(grid: grid)
+
+            foundFossil = nil
+            
+            selectedTab = 0 // Go to CollectionBook
         }
     }
 }
