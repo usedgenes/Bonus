@@ -13,6 +13,7 @@ struct BonusApp: App {
     @StateObject var customer = CustomerStore()
     @StateObject var budgetModel = BudgetModel()
     @StateObject private var fossilCollection = FossilCollection(fossils: sharedFossils)
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

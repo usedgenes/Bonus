@@ -29,11 +29,11 @@ struct ContentView: View {
             NavigationStack {
                 GameView(selectedTab: $selectedTab)
             }
-            .tabItem {
+                .tabItem {
                 Image(systemName: "gamecontroller")
                 Text("Explore")
-            }
-            .tag(2)
+                }
+                .tag(2)
             
             SettingsView()
                 .tabItem {

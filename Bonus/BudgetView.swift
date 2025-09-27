@@ -12,10 +12,37 @@ import Combine
 
 class BudgetModel: ObservableObject {
     @Published var monthlyBudget: Double = 3000.0
+    @Published var userCoins: Int = UserDefaults.standard.integer(forKey: "userCoins")
+    @Published var userSpending: Double = 0.0
+    
+    init() {
+        refreshUserCoinsIfNeeded()
+    }
+    
+    // Call this to manually update userCoins at 8PM
+    func refreshUserCoinsIfNeeded() {
+        let now = Date()
+        let calendar = Calendar.current
+        let lastUpdate = UserDefaults.standard.object(forKey: "lastUserCoinsUpdate") as? Date ?? Date.distantPast
+        
+        // Check if it's a new day AND past 8PM
+        guard !calendar.isDateInToday(lastUpdate) else { return }
+        guard let eightPM = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: now) else { return };
+        guard now >= eightPM else { return }
+        
+        let dailyMax = monthlyBudget / 30
+        let earned = max(dailyMax - userSpending, 0)
+        let coinsToAdd = Int(earned * 0.1)
+        
+        userCoins += coinsToAdd
+        self.userSpending = 0.0
+            
+        // Save to persistent storage
+        UserDefaults.standard.set(userCoins, forKey: "userCoins")
+        UserDefaults.standard.set(Date(), forKey: "lastUserCoinsUpdate")
+        }
 }
 
-// @ 8 pm daily
-// userCoins += Int((BudgetModel.monthlyBudget / 30 - userSpending) * 0.1)
 
 struct PieMeterView: View {
     @EnvironmentObject var budgetModel: BudgetModel
@@ -34,7 +61,7 @@ struct PieMeterView: View {
     }
     
     var amountLeft: Double {
-        budgetModel.monthlyBudget / 30.0 - userSpending
+        budgetModel.monthlyBudget / 30.0 - budgetModel.userSpending
     }
     
     var body: some View {
@@ -65,9 +92,6 @@ struct PieMeterView: View {
         .frame(width: 200, height: 200)
     }
 }
-
-//var monthlyBudget = 3000.0
-var userSpending = 90.0
 
 struct BudgetView: View {
     @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
@@ -106,13 +130,14 @@ struct BudgetView: View {
                 .ignoresSafeArea()
             
             VStack {
+                Text("Coins: \(budgetModel.userCoins)")
                 Text("Today's Remaining Money:")
                     .font(.title)
                     .bold()
                     .padding(.top, 125)
                 
                 if budgetModel.monthlyBudget != 0 {
-                    PieMeterView(percentage: 1 - (userSpending / (budgetModel.monthlyBudget / 30)))
+                    PieMeterView(percentage: 1 - (budgetModel.userSpending / (budgetModel.monthlyBudget / 30)))
                         .padding(.top, 30)
                         .opacity(topOpacity)
                         .environmentObject(budgetModel)
@@ -135,7 +160,7 @@ struct BudgetView: View {
                     VStack(alignment: .trailing) {
                         Text("Money Spent Today:")
                             .font(.title3)
-                        Text("$\(userSpending, specifier: "%.2f")")
+                        Text("$\(budgetModel.userSpending, specifier: "%.2f")")
                             .font(.title2)
                             .bold()
                     }
@@ -166,7 +191,7 @@ struct BudgetView: View {
                             Text("Transaction 1:")
                                 .font(Font.title2)
                             
-                            Text("$\(userSpending, specifier: "%.2f")")
+                            Text("$\(budgetModel.userSpending, specifier: "%.2f")")
                                 .font(Font.title2)
                             
                             // add money transactions here i guess
