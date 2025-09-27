@@ -281,7 +281,21 @@ struct GameView: View {
         GridStorage.save(grid: grid)
 
         if fossilCollection.foundCount == sharedFossils.count {
-            selectedTab = 0 // Switch to the CollectionBook tab (tag 0)
+            // Automatically dig all remaining untouched plots
+            for r in 0..<rows {
+                for c in 0..<columns {
+                    if grid[r][c].state == .untouched {
+                        grid[r][c].state = .dug
+                    }
+                }
+            }
+
+            // Save updated grid after auto-digging
+            GridStorage.save(grid: grid)
+
+            foundFossil = nil
+            
+            selectedTab = 0 // Go to CollectionBook
         }
     }
 }
