@@ -26,7 +26,6 @@ let sharedFossils: [Fossil] = [
     Fossil(name: "Lower Tail", rarity: .rare, picture: "lowerTail", found: false),
     Fossil(name: "Left Arm", rarity: .common, picture: "leftArm", found: false),
     Fossil(name: "Right Arm", rarity: .common, picture: "rightArm", found: false)
-    // add the rest of your fossils here
 ]
 
 struct GameView: View {
@@ -49,12 +48,22 @@ struct GameView: View {
                     let col = index % columns
                     let plot = grid[row][col]
                     
-                    Rectangle()
-                        .fill(color(for: plot))
-                        .frame(height: 30)
-                        .onTapGesture {
-                            dig(atRow: row, col: col)
+                    ZStack {
+                        Rectangle()
+                            .fill(color(for: plot))
+                            .frame(height: 60)
+
+                        if let fossil = plot.fossil, fossil.found {
+                            Image(fossil.picture)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                                .transition(.scale)
                         }
+                    }
+                    .onTapGesture {
+                        dig(atRow: row, col: col)
+                    }
                 }
             }
             .padding()
@@ -115,7 +124,9 @@ struct GameView: View {
             plot.fossil = updatedFossil
         }
 
-        grid[row][col] = plot
+        withAnimation {
+            grid[row][col] = plot
+        }
         GridStorage.save(grid: grid)
     }
 
