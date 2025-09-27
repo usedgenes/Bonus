@@ -30,6 +30,7 @@ let sharedFossils: [Fossil] = [
 ]
 
 struct GameView: View {
+    @Binding var selectedTab: Int
     @State private var foundFossil: Fossil? = nil
     @EnvironmentObject var fossilCollection: FossilCollection
     enum GameNavigation: Hashable {
@@ -228,8 +229,9 @@ struct GameView: View {
         }
 
         GridStorage.save(grid: grid)
+
         if fossilCollection.foundCount == sharedFossils.count {
-            navigationPath.append(GameView.GameNavigation.collectionBook)
+            selectedTab = 0 // Switch to the Collection tab (tag 0)
         }
     }
 
@@ -261,7 +263,7 @@ func color(for state: PlotState) -> Color {
 }
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {
-        GameView()
+        GameView(selectedTab: .constant(2))
             .environmentObject(FossilCollection(fossils: sharedFossils))
     }
 }

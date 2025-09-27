@@ -9,30 +9,38 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+    @State private var selectedTab = 1
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             CollectionBookView()
                 .tabItem {
                     Image(systemName: "book.closed.fill")
                     Text("Collection")
                 }
+                .tag(0)
+            
             BudgetView()
                 .tabItem {
                     Image(systemName: "dollarsign.circle")
                     Text("Budget")
                 }
+                .tag(1)
+            
             NavigationStack {
-                GameView()
+                GameView(selectedTab: $selectedTab)
             }
-                    .tabItem {
-                        Image(systemName: "gamecontroller")
-                        Text("Explore")
-                    }
+            .tabItem {
+                Image(systemName: "gamecontroller")
+                Text("Explore")
+            }
+            .tag(2)
+            
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape.fill")
                     Text("Settings")
                 }
+                .tag(3)
         }
     }
 }
