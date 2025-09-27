@@ -30,6 +30,7 @@ let sharedFossils: [Fossil] = [
 ]
 
 struct GameView: View {
+    @State private var foundFossil: Fossil? = nil
     @EnvironmentObject var fossilCollection: FossilCollection
     let columns = 6
     let rows = 6
@@ -64,13 +65,6 @@ struct GameView: View {
                                 .frame(width: 60, height: 60)
                                 .clipped()
 
-                            if let fossil = plot.fossil, fossil.found {
-                                Image(fossil.picture)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 40, height: 40)
-                            }
-
                             if plot.state == .dug && plot.fossil == nil {
                                 Color.black.opacity(0.3)
                                     .frame(width: 60, height: 60)
@@ -88,6 +82,44 @@ struct GameView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
 
                 Spacer() // Optional: adds space below the grid
+            }
+            if let fossil = foundFossil {
+                ZStack {
+                    // Background overlay
+                    Color.black.opacity(0.5)
+                        .ignoresSafeArea()
+
+                    VStack(spacing: 16) {
+                        Image(fossil.picture)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+
+                        Text(fossil.name)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(fossil.rarityColor)
+
+                        Text(fossil.rarity.rawValue.capitalized)
+                            .font(.headline)
+                            .foregroundColor(.white)
+
+                        Button("Close") {
+                            withAnimation {
+                                foundFossil = nil
+                            }
+                        }
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.85))
+                    .cornerRadius(20)
+                    .padding()
+                }
+                .transition(.scale)
+                .zIndex(1) // Ensure it appears on top
             }
         }
         .onAppear {
@@ -144,15 +176,19 @@ struct GameView: View {
 
         if let fossil = plot.fossil, !fossil.found {
             fossilCollection.markFound(fossilName: fossil.name)
-            // Update the plot's fossil as found
+
             var updatedFossil = fossil
             updatedFossil.found = true
             plot.fossil = updatedFossil
+
+            // Show popup with discovered fossil
+            foundFossil = updatedFossil
         }
 
         withAnimation {
             grid[row][col] = plot
         }
+
         GridStorage.save(grid: grid)
     }
 
