@@ -91,7 +91,11 @@ struct GameView: View {
             }
         }
         .onAppear {
-            setupGrid()
+            if let savedGrid = GridStorage.load() {
+                grid = savedGrid
+            } else {
+                setupGrid()
+            }
         }
         
     }
