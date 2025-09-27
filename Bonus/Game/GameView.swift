@@ -8,24 +8,25 @@
 import SwiftUI
 
 let sharedFossils: [Fossil] = [
-    Fossil(name: "Skull", rarity: .legendary, picture: "skull", found: false),
-    Fossil(name: "Neck", rarity: .legendary, picture: "neck", found: false),
-    Fossil(name: "Left Claw", rarity: .rare, picture: "leftClaw", found: false),
-    Fossil(name: "Right Claw", rarity: .rare, picture: "rightClaw", found: false),
-    Fossil(name: "Upper Left Ribcage", rarity: .uncommon, picture:"upperLeftRib", found: false),
-    Fossil(name: "Upper Right Ribcage", rarity: .uncommon, picture:"upperRightRib", found: false),
-    Fossil(name: "Lower Left Ribcage", rarity: .uncommon, picture:"lowerLeftRib", found: false),
-    Fossil(name: "Lower Right Ribcage", rarity: .uncommon, picture:"lowerRightRib", found: false),
-    Fossil(name: "Left Thighbone", rarity: .uncommon, picture:"leftThigh", found: false),
-    Fossil(name: "Right Thighbone", rarity: .uncommon, picture: "rightThigh", found: false),
-    Fossil(name: "Left Shinbone", rarity: .common, picture: "leftShinbone", found: false),
-    Fossil(name: "Right Shinbone", rarity: .common, picture: "rightShinbone", found: false),
-    Fossil(name: "Left Foot", rarity: .common, picture: "leftFoot", found: false),
-    Fossil(name: "Right Foot", rarity: .common, picture: "rightFoot", found: false),
-    Fossil(name: "Upper Tail", rarity: .rare, picture: "upperTail", found: false),
-    Fossil(name: "Lower Tail", rarity: .rare, picture: "lowerTail", found: false),
-    Fossil(name: "Left Arm", rarity: .common, picture: "leftArm", found: false),
-    Fossil(name: "Right Arm", rarity: .common, picture: "rightArm", found: false)
+    Fossil(name: "Skull", rarity: .legendary, picture: "skull", found: true),
+    Fossil(name: "Neck", rarity: .legendary, picture: "neck", found: true),
+    Fossil(name: "Left Claw", rarity: .rare, picture: "leftClaw", found: true),
+    Fossil(name: "Right Claw", rarity: .rare, picture: "rightClaw", found: true),
+    Fossil(name: "Upper Tail", rarity: .rare, picture: "upperTail", found: true),
+    Fossil(name: "Lower Tail", rarity: .rare, picture: "lowerTail", found: true),
+    Fossil(name: "Upper Left Ribcage", rarity: .uncommon, picture:"upperLeftRib", found: true),
+    Fossil(name: "Upper Right Ribcage", rarity: .uncommon, picture:"upperRightRib", found: true),
+    Fossil(name: "Lower Left Ribcage", rarity: .uncommon, picture:"lowerLeftRib", found: true),
+    Fossil(name: "Lower Right Ribcage", rarity: .uncommon, picture:"lowerRightRib", found: true),
+    Fossil(name: "Left Thighbone", rarity: .uncommon, picture:"leftThigh", found: true),
+    Fossil(name: "Right Thighbone", rarity: .uncommon, picture: "rightThigh", found: true),
+    Fossil(name: "Left Shinbone", rarity: .common, picture: "leftShinbone", found: true),
+    Fossil(name: "Right Shinbone", rarity: .common, picture: "rightShinbone", found: true),
+    Fossil(name: "Left Foot", rarity: .common, picture: "leftFoot", found: true),
+    Fossil(name: "Right Foot", rarity: .common, picture: "rightFoot", found: true),
+
+    Fossil(name: "Left Arm", rarity: .common, picture: "leftArm", found: true),
+    Fossil(name: "Right Arm", rarity: .common, picture: "rightArm", found: true)
 ]
 
 struct GameView: View {
