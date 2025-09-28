@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
-    @State private var selectedTab = 1
+    @State private var selectedTab = 3
     var body: some View {
         TabView(selection: $selectedTab) {
             CollectionBookView()
@@ -19,13 +19,6 @@ struct ContentView: View {
                 }
                 .tag(0)
             
-            BudgetView()
-                .tabItem {
-                    Image(systemName: "dollarsign.circle")
-                    Text("Budget")
-                }
-                .tag(1)
-            
             NavigationStack {
                 GameView(selectedTab: $selectedTab)
             }
@@ -34,6 +27,14 @@ struct ContentView: View {
                 Text("Explore")
             }
             .tag(2)
+            
+            BudgetView()
+                .tabItem {
+                    Image(systemName: "dollarsign.circle")
+                    Text("Budget")
+                }
+                .tag(1)
+            
             
             SettingsView()
                 .tabItem {

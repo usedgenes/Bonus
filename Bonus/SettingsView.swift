@@ -80,11 +80,15 @@ struct SettingsView: View {
             VStack {
                 Button() {
                     if (showCalculator) {
-                        if (budgetModel.monthlyBudget > 5000)  {
-                            showError = true
-                        } else {
-                            showCalculator.toggle()
+                        Task {
+                            let account = await customer.getAccount()
+                            if (Int(budgetModel.monthlyBudget) > account!.balance)  {
+                                showError = true
+                            } else {
+                                showCalculator.toggle()
+                            }
                         }
+
                     } else {
                         showCalculator.toggle()
                     }
