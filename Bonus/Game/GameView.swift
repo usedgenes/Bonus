@@ -52,7 +52,6 @@ struct GameView: View {
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
         NavigationStack(path: $navigationPath) {
             ZStack {
-                // Background grass image
                 Image("grassBackground")
                     .resizable()
                     .scaledToFill()
@@ -103,7 +102,7 @@ struct GameView: View {
                                             .scaledToFit()
                                             .frame(width: 40, height: 40)
                                     } else {
-                                        Image(fossil.picture) // fallback if the custom UIImage fails
+                                        Image(fossil.picture)
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 40, height: 40)
@@ -127,20 +126,11 @@ struct GameView: View {
                     .padding()
                     .background(Color.clear)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Button("Reset Grid") {
-                        resetGrid()
-                    }
-                    .padding()
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    
+                    .padding(.bottom, 50);
                     Spacer()
                 }
                 if let fossil = foundFossil {
                     ZStack {
-                        // Background overlay
                         Color.black.opacity(0.5)
                             .ignoresSafeArea()
                         
@@ -183,7 +173,6 @@ struct GameView: View {
                 }
                 if showInsufficientCoinsPopup {
                     ZStack {
-                        // Dimmed background
                         Color.black.opacity(0.5)
                             .ignoresSafeArea()
 
@@ -215,7 +204,7 @@ struct GameView: View {
                         .cornerRadius(20)
                         .padding()
                     }
-                    .zIndex(2) // Ensure it's above all content
+                    .zIndex(2)
                 }
             }
             
@@ -228,14 +217,11 @@ struct GameView: View {
         }
         .onAppear {
             if isFirstLaunch() {
-                // First time ever — setup fresh grid and save
                 setupGrid()
                 markAppAsLaunched()
             } else if let savedGrid = GridStorage.load() {
-                // Returning user — load previous grid
                 grid = savedGrid
             } else {
-                // Fallback — no saved grid (could happen if user manually deleted it)
                 setupGrid()
             }
         }
@@ -250,22 +236,16 @@ struct GameView: View {
     }
     
     func resetGrid() {
-        // Remove saved grid file
         GridStorage.clear()
 
-        // Reset fossils to all unfound
         for index in fossilCollection.fossils.indices {
             fossilCollection.fossils[index].found = false
         }
 
-        // Re-generate a new grid
         setupGrid()
     }
     func setupGrid() {
-        //Define unique fossils
         let fossils = sharedFossils
-
-        //Generate all positions in the grid
         let rows = 6
         
         let columns = 6
@@ -276,11 +256,9 @@ struct GameView: View {
             }
         }
 
-        //Shuffle fossils and positions
         let shuffledFossils = fossils.shuffled()
         let shuffledPositions = positions.shuffled()
 
-        //Create grid with fossils placed at random positions
         var newGrid: [[Plot]] = Array(
             repeating: Array(repeating: Plot(state: .untouched, fossil: nil), count: columns),
             count: rows
@@ -291,7 +269,6 @@ struct GameView: View {
             newGrid[pos.row][pos.col].fossil = shuffledFossils[i]
         }
 
-        //Set it as your current grid and save it
         grid = newGrid
         GridStorage.save(grid: grid)
     }
@@ -317,7 +294,6 @@ struct GameView: View {
             updatedFossil.found = true
             plot.fossil = updatedFossil
 
-            //Show popup with discovered fossil
             foundFossil = updatedFossil
         }
 
@@ -328,7 +304,6 @@ struct GameView: View {
         GridStorage.save(grid: grid)
 
         if fossilCollection.foundCount == sharedFossils.count {
-            // Dig all remaining untouched plots
             for r in 0..<rows {
                 for c in 0..<columns {
                     if grid[r][c].state == .untouched {
