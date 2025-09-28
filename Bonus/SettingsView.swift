@@ -108,6 +108,7 @@ struct SettingsView: View {
                 
                 VStack(spacing: 0) {
                     Button {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         if (showCalculator) {
                             Task {
                                 let account = await customer.getAccount()
