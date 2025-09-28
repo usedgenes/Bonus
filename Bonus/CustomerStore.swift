@@ -116,13 +116,15 @@ class CustomerStore: ObservableObject {
     
     func getAllWithdrawalsFromAccount() async -> [Withdrawal] {
         do {
-            if let withdrawals = try await WithdrawalRequest().getWithdrawalsFromAccountId(account!.accountId) {
-                if withdrawals.count > 0 {
-                    let withdrawal = withdrawals[0]
-                    print(withdrawals)
-                    return withdrawals
-                } else {
-                    print("No withdrawals found")
+            if (account != nil) {
+                if let withdrawals = try await WithdrawalRequest().getWithdrawalsFromAccountId(account!.accountId) {
+                    if withdrawals.count > 0 {
+                        let withdrawal = withdrawals[0]
+                        print(withdrawals)
+                        return withdrawals
+                    } else {
+                        print("No withdrawals found")
+                    }
                 }
             }
         } catch let error as NSError {
