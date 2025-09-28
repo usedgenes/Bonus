@@ -34,6 +34,7 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, minHeight: 60)
                 }
                 .buttonStyle(.borderedProminent)
+                .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
                 
                 Button {
                     showingAccountInfo = true
@@ -43,7 +44,9 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, minHeight: 60)
                 }
                 .buttonStyle(.borderedProminent)
+                .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
                 .disabled(customer.customer == nil)
+                
                 VStack(spacing: 0) {
                     Button {
                         if let amount = Double(transactionAmount) {
@@ -57,6 +60,7 @@ struct SettingsView: View {
                             .frame(maxWidth: .infinity, minHeight: 60)
                     }
                     .buttonStyle(.borderedProminent)
+                    .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
                     .disabled(customer.account == nil)
                     
                     TextField("Enter amount", text: $transactionAmount)
@@ -147,7 +151,8 @@ struct SettingsView: View {
                         .font(.title2.bold())
                         .frame(maxWidth: .infinity, minHeight: 60)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)
+                .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
                 .tint(.red)
                 
                 Button {
@@ -159,7 +164,8 @@ struct SettingsView: View {
                         .font(.title2.bold())
                         .frame(maxWidth: .infinity, minHeight: 60)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)
+                .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
                 .tint(.red)
                 
                 Button() {
@@ -172,7 +178,9 @@ struct SettingsView: View {
                         .font(.title2.bold())
                         .frame(maxWidth: .infinity, minHeight: 60)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)
+                .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
+
             }
             .padding(.horizontal)
             .alert(isPresented: $showError) {
@@ -190,3 +198,22 @@ struct SettingsView: View {
         .environmentObject(BudgetModel())
         .environmentObject(CustomerStore())
 }
+
+struct PressableButtonStyle: ButtonStyle {
+    var scaleAmount: CGFloat = 0.95
+    var pressedColor: Color = Color.gray.opacity(0.3)
+    var cornerRadius: CGFloat = 12
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding() // ensure background fills the button
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(configuration.isPressed ? pressedColor : Color.clear)
+            )
+            .scaleEffect(configuration.isPressed ? scaleAmount : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+
+    }
+}
+
