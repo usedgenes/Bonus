@@ -17,6 +17,7 @@ struct SettingsView: View {
     @EnvironmentObject var budgetModel: BudgetModel
     @State private var showCalculator = false
     @State private var showError = false
+    @State private var monthlyBudget = "3000"
     
     var body: some View {
         ScrollView {
@@ -83,66 +84,60 @@ struct SettingsView: View {
             }
             
             VStack {
-                Button() {
-                    if (showCalculator) {
-                        Task {
-                            let account = await customer.getAccount()
-                            if (Int(budgetModel.monthlyBudget) > account!.balance)  {
-                                showError = true
-                            } else {
-                                showCalculator.toggle()
-                            }
-                        }
-
-                    } else {
-                        showCalculator.toggle()
-                    }
-                } label: {
-                    Label(showCalculator ? "Click here when done" : "Enter new monthly budget", systemImage: "dollarsign.circle.fill")
-                        .font(.title2.bold())
-                        .frame(maxWidth: .infinity, minHeight: 60)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(customer.account == nil)
-
-                if showCalculator {
-                    Text("Monthly Budget: \(budgetModel.monthlyBudget, specifier: "%.0f")")
-                        .font(Font.title)
-                    
-                    ForEach([[1, 2, 3], [4, 5, 6], [7, 8, 9]], id: \.self) { row in
-                        HStack {
-                            ForEach(row, id: \.self) { number in
-                                Button(action: {
-                                    budgetModel.monthlyBudget = budgetModel.monthlyBudget * 10 + number
-                                }) {
-                                    Text("\(number, specifier: "%.0f")")
-                                        .frame(width: 60, height: 60)
-                                        .background(Color.gray)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(8)
+//                Button() {
+//                    if (showCalculator) {
+//                        Task {
+//                            let account = await customer.getAccount()
+//                            if (Int(budgetModel.monthlyBudget) > account!.balance)  {
+//                                showError = true
+//                            } else {
+//                                showCalculator.toggle()
+//                            }
+//                        }
+//
+//                    } else {
+//                        showCalculator.toggle()
+//                    }
+//                } label: {
+//                    Label(showCalculator ? "Click here when done" : "Enter new monthly budget", systemImage: "dollarsign.circle.fill")
+//                        .font(.title2.bold())
+//                        .frame(maxWidth: .infinity, minHeight: 60)
+//                }
+//                .buttonStyle(.borderedProminent)
+//                .disabled(customer.account == nil)
+                
+                VStack(spacing: 0) {
+                    Button {
+                        if (showCalculator) {
+                            Task {
+                                let account = await customer.getAccount()
+                                if (Int(monthlyBudget)! > account!.balance)  {
+                                    showError = true
+                                } else {
+                                    budgetModel.monthlyBudget = Double(monthlyBudget)!
                                 }
                             }
+                        } else {
+                            showCalculator.toggle()
                         }
+                    } label: {
+                        Label("Change Monthly Salary", systemImage: "plus.circle.fill")
+                            .font(.title2.bold())
+                            .frame(maxWidth: .infinity, minHeight: 60)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
+                    .disabled(customer.account == nil)
                     
-                    HStack {
-                        Button("0") {
-                            budgetModel.monthlyBudget = budgetModel.monthlyBudget * 10
-                        }
-                        .frame(width: 60, height: 60)
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                        
-                        Button("Clear") {
-                            budgetModel.monthlyBudget = 0.0
-                        }
-                        .frame(width: 130, height: 60)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                    }
+                    TextField("Enter amount", text: $monthlyBudget)
+                        .keyboardType(.decimalPad)
+                        .font(.title3)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .disabled(customer.account == nil)
                 }
+
                 Button {
                     Task {
                         await customer.deleteCustomers()

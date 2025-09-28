@@ -14,8 +14,6 @@ class BudgetModel: ObservableObject {
     @Published var monthlyBudget: Double = 3000.0
 }
 
-// @ 8 pm daily
-// userCoins += Int((BudgetModel.monthlyBudget / 30 - userSpending) * 0.1)
 
 struct PieMeterView: View {
     @EnvironmentObject var budgetModel: BudgetModel
@@ -66,7 +64,6 @@ struct PieMeterView: View {
     }
 }
 
-//var monthlyBudget = 3000.0
 var userSpending = 0.0
 
 struct BudgetView: View {
@@ -151,8 +148,7 @@ struct BudgetView: View {
                 Button {
                     Task {
                         if (await !checkIfWithdrawalsExceededDailyMax()) {
-                            coinManager.addCoins(100)
-                            print("adding")
+                            coinManager.addCoins(Int(budgetModel.monthlyBudget / 30.0 - userSpending))
                         }
                     }
                 } label: {
@@ -261,26 +257,8 @@ struct BudgetView: View {
                             userSpending = totalWithdrawals
                         }
                     }
-                    
                 }
             }
-            // this commented stuff is for dragging the thing up but lowk it feels weird
-            // so it's click only now
-//            .gesture(
-//                DragGesture()
-//                    .updating($dragOffset) { value, state, _ in
-//                        state = value.translation.height
-//                    }
-//                    .onEnded { value in
-//                        // Snap to top or bottom depending on drag
-//                        let newOffset = offsetY + value.translation.height
-//                        let middle = UIScreen.main.bounds.height * 0.7
-//                        withAnimation(.easeInOut) {
-//                            offsetY = newOffset < middle ? 100 : UIScreen.main.bounds.height * 0.7
-//                            }
-//                        }
-//                )
-//                .animation(.easeInOut, value: offsetY)
         }
     }
     
