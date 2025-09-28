@@ -17,6 +17,7 @@ struct SettingsView: View {
     @EnvironmentObject var budgetModel: BudgetModel
     @State private var showCalculator = false
     @State private var showError = false
+    @State private var monthlyBudget = "3000"
     
     var body: some View {
         ScrollView {
@@ -82,27 +83,59 @@ struct SettingsView: View {
             }
             
             VStack {
-                Button() {
-                    if (showCalculator) {
-                        Task {
-                            let account = await customer.getAccount()
-                            if (Int(budgetModel.monthlyBudget) > account!.balance)  {
-                                showError = true
-                            } else {
-                                showCalculator.toggle()
+//                Button() {
+//                    if (showCalculator) {
+//                        Task {
+//                            let account = await customer.getAccount()
+//                            if (Int(budgetModel.monthlyBudget) > account!.balance)  {
+//                                showError = true
+//                            } else {
+//                                showCalculator.toggle()
+//                            }
+//                        }
+//
+//                    } else {
+//                        showCalculator.toggle()
+//                    }
+//                } label: {
+//                    Label(showCalculator ? "Click here when done" : "Enter new monthly budget", systemImage: "dollarsign.circle.fill")
+//                        .font(.title2.bold())
+//                        .frame(maxWidth: .infinity, minHeight: 60)
+//                }
+//                .buttonStyle(.borderedProminent)
+//                .disabled(customer.account == nil)
+                
+                VStack(spacing: 0) {
+                    Button {
+                        if (showCalculator) {
+                            Task {
+                                let account = await customer.getAccount()
+                                if (Int(monthlyBudget)! > account!.balance)  {
+                                    showError = true
+                                } else {
+                                    budgetModel.monthlyBudget = Double(monthlyBudget)!
+                                }
                             }
+                        } else {
+                            showCalculator.toggle()
                         }
-
-                    } else {
-                        showCalculator.toggle()
+                    } label: {
+                        Label("Change Monthly Salary", systemImage: "plus.circle.fill")
+                            .font(.title2.bold())
+                            .frame(maxWidth: .infinity, minHeight: 60)
                     }
-                } label: {
-                    Label(showCalculator ? "Click here when done" : "Enter new monthly budget", systemImage: "dollarsign.circle.fill")
-                        .font(.title2.bold())
-                        .frame(maxWidth: .infinity, minHeight: 60)
+                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(PressableButtonStyle(pressedColor: .black.opacity(0.2)))
+                    .disabled(customer.account == nil)
+                    
+                    TextField("Enter amount", text: $monthlyBudget)
+                        .keyboardType(.decimalPad)
+                        .font(.title3)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .disabled(customer.account == nil)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(customer.account == nil)
 
                 Button {
                     Task {
