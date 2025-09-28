@@ -93,6 +93,9 @@ struct PieMeterView: View {
     }
 }
 
+//var monthlyBudget = 3000.0
+var userSpending = 0.0
+
 struct BudgetView: View {
     @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
     @GestureState private var dragOffset: CGFloat = 0
@@ -221,7 +224,31 @@ struct BudgetView: View {
                     offsetY = offsetY > 200 ? 100 : UIScreen.main.bounds.height * 0.7
                 }
             }
-            
+            .onAppear {
+                scheduleDailyAtCertainTime(for: .current) {
+                    Task {
+                        if (await checkIfWithdrawalsExceededDailyMax()) {
+                            print("bad")
+                        }
+                        else {
+                            print("good")
+                        }
+                    }
+                }
+                Task {
+                    if (customer.customer != nil && customer.account != nil) {
+                        var withdrawals = await customer.getAllWithdrawalsFromAccount()
+                        if (withdrawals.count > 0) {
+                            var totalWithdrawals : Double = 0
+                            for withdrawal in withdrawals {
+                                totalWithdrawals += withdrawal.amount
+                            }
+                            userSpending = totalWithdrawals
+                        }
+                    }
+                    
+                }
+            }
             // this commented stuff is for dragging the thing up but lowk it feels weird
             // so it's click only now
 //            .gesture(
@@ -240,6 +267,59 @@ struct BudgetView: View {
 //                )
 //                .animation(.easeInOut, value: offsetY)
         }
+    }
+    
+    func checkIfWithdrawalsExceededDailyMax() async -> Bool {
+        withdrawals = await customer.getAllWithdrawalsFromAccount()
+        var totalWithdrawals : Double = 0
+        for withdrawal in withdrawals {
+            totalWithdrawals += withdrawal.amount
+        }
+        if (totalWithdrawals <= budgetModel.monthlyBudget / 30) {
+            return false
+        }
+        return true
+    }
+    
+    func loadWithdrawals() async {
+        if(customer.account == nil) {
+            
+        }
+        else { do {
+            if let result = try await withdrawalRequest.getWithdrawalsFromAccountId(customer.account!.accountId) {
+                withdrawals = result
+            }
+        } catch {
+            print("Failed to load withdrawals:", error)
+        }
+            isLoading = false
+        }
+    }
+}
+
+func scheduleDailyAtCertainTime(for timeZone: TimeZone = .current, action: @escaping () -> Void) {
+    let calendar = Calendar.current
+    let now = Date()
+
+    var calendarWithZone = calendar
+    calendarWithZone.timeZone = timeZone
+
+    var components = calendarWithZone.dateComponents([.year, .month, .day], from: now)
+    components.hour = 23
+    components.minute = 18
+    components.second = 0
+
+    guard let todayAtTen = calendarWithZone.date(from: components) else { return }
+
+    let nextRun = todayAtTen < now
+        ? calendarWithZone.date(byAdding: .day, value: 1, to: todayAtTen)!
+        : todayAtTen
+
+    let interval = nextRun.timeIntervalSinceNow
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
+        action()
+        scheduleDailyAtCertainTime(for: timeZone, action: action) // reschedule
     }
 }
 
