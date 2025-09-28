@@ -127,6 +127,22 @@ struct GameView: View {
                     .background(Color.clear)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.bottom, 50);
+                    
+                    
+                    //INVISIBLE RESET BUTTON FOR DEMO
+                    Button(action: {
+                                resetGrid()
+                            }) {
+                                Text("Reset")
+                                    .foregroundColor(Color.clear)
+                                    .padding()
+                            }
+                            .background(Color.clear)
+                            //.border(Color.white, width: 2)
+                            //uncomment above to see where invisible reset button is
+                    
+                    
+                    
                     Spacer()
                 }
                 if let fossil = foundFossil {
