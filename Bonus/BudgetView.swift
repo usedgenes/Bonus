@@ -64,7 +64,6 @@ struct PieMeterView: View {
     }
 }
 
-//var monthlyBudget = 3000.0
 var userSpending = 0.0
 
 struct BudgetView: View {
@@ -149,7 +148,7 @@ struct BudgetView: View {
                 Button {
                     Task {
                         if (await !checkIfWithdrawalsExceededDailyMax()) {
-                            coinManager.addCoins(100)
+                            coinManager.addCoins(Int(budgetModel.monthlyBudget / 30.0 - userSpending))
                         }
                     }
                 } label: {

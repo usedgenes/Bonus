@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Combine // ✅ Required for ObservableObject
+import Combine 
 
 class CoinManager: ObservableObject {
     @Published var coins: Int {
@@ -33,5 +33,9 @@ class CoinManager: ObservableObject {
 
     func resetCoins() {
         coins = 0
+    }
+    
+    func resetCoins(_ amount: Int) {
+        coins = amount
     }
 }

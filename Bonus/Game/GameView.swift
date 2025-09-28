@@ -131,12 +131,13 @@ struct GameView: View {
                     
                     //INVISIBLE RESET BUTTON FOR DEMO
                     Button(action: {
-                                resetGrid()
-                            }) {
-                                Text("Reset")
-                                    .foregroundColor(Color.clear)
-                                    .padding()
-                            }
+                        resetGrid()
+                        coinManager.resetCoins(120)
+                    }) {
+                        Text("Reset")
+                            .foregroundColor(Color.clear)
+                            .padding()
+                    }
                             .background(Color.clear)
                             //.border(Color.white, width: 2)
                             //uncomment above to see where invisible reset button is
