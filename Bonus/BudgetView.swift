@@ -74,6 +74,7 @@ struct BudgetView: View {
     @State private var withdrawals: [Withdrawal] = []
     @State private var isLoading = true
     @EnvironmentObject var customer: CustomerStore
+    @EnvironmentObject var coinManager: CoinManager
     let withdrawalRequest = WithdrawalRequest()
 
     
@@ -116,7 +117,6 @@ struct BudgetView: View {
                 
                 if budgetModel.monthlyBudget != 0 {
                     PieMeterView(percentage: 1 - (userSpending / (budgetModel.monthlyBudget / 30)))
-                        .padding(.top, 30)
                         .opacity(topOpacity)
                         .environmentObject(budgetModel)
                 } else {
@@ -144,8 +144,29 @@ struct BudgetView: View {
                     }
                 }
                 .padding(.top, 30)
-                .padding()
+                .padding(.horizontal)
                 .opacity(topOpacity)
+                Button {
+                    Task {
+                        if (await !checkIfWithdrawalsExceededDailyMax()) {
+                            coinManager.addCoins(100)
+                        }
+                    }
+                } label: {
+                    Label("Refresh Coins", systemImage: "arrow.clockwise")
+                        .font(.title2.bold())
+                        .frame(maxWidth: 300, minHeight: 20)
+                }
+                .buttonStyle(.borderedProminent)
+                Button {
+                    coinManager.resetCoins()
+                } label: {
+                    Label("Reset Coins", systemImage: "trash")
+                        .font(.title2.bold())
+                        .frame(maxWidth: 300, minHeight: 20)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
                 
             }
             .scaleEffect(topScale)
@@ -171,7 +192,6 @@ struct BudgetView: View {
                 }
 
                 ScrollView {
-                   
                     VStack(alignment: .leading, spacing: 16) {
                         if (customer.account == nil) {
                             Text("No account added")
@@ -261,12 +281,15 @@ struct BudgetView: View {
     
     func checkIfWithdrawalsExceededDailyMax() async -> Bool {
         withdrawals = await customer.getAllWithdrawalsFromAccount()
-        var totalWithdrawals : Double = 0
-        for withdrawal in withdrawals {
-            totalWithdrawals += withdrawal.amount
-        }
-        if (totalWithdrawals <= budgetModel.monthlyBudget / 30) {
-            return false
+        if (withdrawals.count > 0) {
+            var totalWithdrawals : Double = 0
+            for withdrawal in withdrawals {
+                totalWithdrawals += withdrawal.amount
+            }
+            if (totalWithdrawals <= budgetModel.monthlyBudget / 30) {
+                return false
+            }
+            return true
         }
         return true
     }

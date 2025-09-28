@@ -13,7 +13,7 @@ struct AccountCreationView: View {
 
     @State private var accountType: AccountType = AccountType.Checking
     @State private var nickname: String = "Bank Account"
-    @State private var balance: String = "1000"
+    @State private var balance: String = "5000"
     @State private var accountNumber: String = "4003830171874018"
 
     var body: some View {
