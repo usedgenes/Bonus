@@ -103,6 +103,7 @@ struct BudgetView: View {
     @State private var withdrawals: [Withdrawal] = []
     @State private var isLoading = true
     @EnvironmentObject var customer: CustomerStore
+    @EnvironmentObject var coinManager: CoinManager
     let withdrawalRequest = WithdrawalRequest()
 
     
@@ -174,8 +175,29 @@ struct BudgetView: View {
                     }
                 }
                 .padding(.top, 30)
-                .padding()
+                .padding(.horizontal)
                 .opacity(topOpacity)
+                Button {
+                    Task {
+                        if (await !checkIfWithdrawalsExceededDailyMax()) {
+                            coinManager.addCoins(100)
+                        }
+                    }
+                } label: {
+                    Label("Refresh Coins", systemImage: "arrow.clockwise")
+                        .font(.title2.bold())
+                        .frame(maxWidth: 300, minHeight: 20)
+                }
+                .buttonStyle(.borderedProminent)
+                Button {
+                    coinManager.resetCoins()
+                } label: {
+                    Label("Reset Coins", systemImage: "trash")
+                        .font(.title2.bold())
+                        .frame(maxWidth: 300, minHeight: 20)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
                 
             }
             .scaleEffect(topScale)
@@ -186,9 +208,47 @@ struct BudgetView: View {
                     .frame(width: 40, height: 6)
                     .foregroundColor(.gray)
                     .padding(.top, 8)
-                
-                Text("Recent Transactions:")
-                    .font(Font.title.bold())
+                HStack {
+                    Text("Recent Transactions:")
+                        .font(Font.title.bold())
+                        .padding()
+                    Button(action: {
+                        Task {
+                            await loadWithdrawals()
+                        }
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.title2)
+                    }
+                }
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        if (customer.account == nil) {
+                            Text("No account added")
+                        }
+                        else {
+                            if isLoading {
+                                ProgressView("Loading...")
+                            } else if withdrawals.isEmpty {
+                                Text("No withdrawals found.")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(withdrawals, id: \.withdrawalId) { withdrawal in
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Withdrawal ID: \(withdrawal.withdrawalId)")
+                                            .font(.headline)
+                                        Text("Amount: $\(withdrawal.amount, specifier: "%.2f")")
+                                        Text("Status: \(withdrawal.status.rawValue.capitalized)")
+                                        Text("Date: \(withdrawal.transactionDate ?? "N/A")")
+                                    }
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
                     .padding()
                 
                 ScrollView {
@@ -271,12 +331,15 @@ struct BudgetView: View {
     
     func checkIfWithdrawalsExceededDailyMax() async -> Bool {
         withdrawals = await customer.getAllWithdrawalsFromAccount()
-        var totalWithdrawals : Double = 0
-        for withdrawal in withdrawals {
-            totalWithdrawals += withdrawal.amount
-        }
-        if (totalWithdrawals <= budgetModel.monthlyBudget / 30) {
-            return false
+        if (withdrawals.count > 0) {
+            var totalWithdrawals : Double = 0
+            for withdrawal in withdrawals {
+                totalWithdrawals += withdrawal.amount
+            }
+            if (totalWithdrawals <= budgetModel.monthlyBudget / 30) {
+                return false
+            }
+            return true
         }
         return true
     }
