@@ -79,6 +79,18 @@ class CustomerStore: ObservableObject {
         }
     }
     
+    func getAccount() async -> Account? {
+        do {
+            if let account = try await AccountRequest().getAccount(account!.accountId) {
+                print(account)
+                return account
+            }
+        } catch let error as NSError {
+            print(error)
+        }
+        return nil
+    }
+    
     func postWithdrawal(medium: TransactionMedium, transactionDate: String? = nil, amount: Double, status: TransferStatus? = nil, description: String? = nil) async {
         do {
             let withdrawalToCreate = WithdrawalPostData(
@@ -100,5 +112,22 @@ class CustomerStore: ObservableObject {
             print(error)
             print(customerId)
         }
+    }
+    
+    func getAllWithdrawalsFromAccount() async -> [Withdrawal] {
+        do {
+            if let withdrawals = try await WithdrawalRequest().getWithdrawalsFromAccountId(account!.accountId) {
+                if withdrawals.count > 0 {
+                    let withdrawal = withdrawals[0]
+                    print(withdrawals)
+                    return withdrawals
+                } else {
+                    print("No withdrawals found")
+                }
+            }
+        } catch let error as NSError {
+            print(error)
+        }
+        return []
     }
 }

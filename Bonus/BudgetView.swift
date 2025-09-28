@@ -12,35 +12,6 @@ import Combine
 
 class BudgetModel: ObservableObject {
     @Published var monthlyBudget: Double = 3000.0
-    @Published var userCoins: Int = UserDefaults.standard.integer(forKey: "userCoins")
-    @Published var userSpending: Double = 0.0
-    
-//    init() {
-//        refreshUserCoinsIfNeeded()
-//    }
-//    
-//    // Call this to manually update userCoins at 8PM
-//    func refreshUserCoinsIfNeeded() {
-//        let now = Date()
-//        let calendar = Calendar.current
-//        let lastUpdate = UserDefaults.standard.object(forKey: "lastUserCoinsUpdate") as? Date ?? Date.distantPast
-//        
-//        // Check if it's a new day AND past 8PM
-//        guard !calendar.isDateInToday(lastUpdate) else { return }
-//        guard let eightPM = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: now) else { return };
-//        guard now >= eightPM else { return }
-//        
-//        let dailyMax = monthlyBudget / 30
-//        let earned = max(dailyMax - userSpending, 0)
-//        let coinsToAdd = Int(earned * 0.1)
-//        
-//        userCoins += coinsToAdd
-//        self.userSpending = 0.0
-//            
-//        // Save to persistent storage
-//        UserDefaults.standard.set(userCoins, forKey: "userCoins")
-//        UserDefaults.standard.set(Date(), forKey: "lastUserCoinsUpdate")
-//        }
 }
 
 
@@ -61,7 +32,7 @@ struct PieMeterView: View {
     }
     
     var amountLeft: Double {
-        budgetModel.monthlyBudget / 30.0 - budgetModel.userSpending
+        budgetModel.monthlyBudget / 30.0 - userSpending
     }
     
     var body: some View {
@@ -93,11 +64,19 @@ struct PieMeterView: View {
     }
 }
 
+//var monthlyBudget = 3000.0
+var userSpending = 0.0
+
 struct BudgetView: View {
     @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
     @GestureState private var dragOffset: CGFloat = 0
     @EnvironmentObject var budgetModel: BudgetModel
+    @State private var withdrawals: [Withdrawal] = []
+    @State private var isLoading = true
+    @EnvironmentObject var customer: CustomerStore
+    let withdrawalRequest = WithdrawalRequest()
 
+    
     var bottomHeight: CGFloat {
         return offsetY < 200 ? 400 : 200 // or pick your own sizes
     }
@@ -130,14 +109,13 @@ struct BudgetView: View {
                 .ignoresSafeArea()
             
             VStack {
-                Text("Coins: \(budgetModel.userCoins)")
                 Text("Today's Remaining Money:")
                     .font(.title)
                     .bold()
                     .padding(.top, 125)
                 
                 if budgetModel.monthlyBudget != 0 {
-                    PieMeterView(percentage: 1 - (budgetModel.userSpending / (budgetModel.monthlyBudget / 30)))
+                    PieMeterView(percentage: 1 - (userSpending / (budgetModel.monthlyBudget / 30)))
                         .padding(.top, 30)
                         .opacity(topOpacity)
                         .environmentObject(budgetModel)
@@ -160,7 +138,7 @@ struct BudgetView: View {
                     VStack(alignment: .trailing) {
                         Text("Money Spent Today:")
                             .font(.title3)
-                        Text("$\(budgetModel.userSpending, specifier: "%.2f")")
+                        Text("$\(userSpending, specifier: "%.2f")")
                             .font(.title2)
                             .bold()
                     }
@@ -178,31 +156,51 @@ struct BudgetView: View {
                     .frame(width: 40, height: 6)
                     .foregroundColor(.gray)
                     .padding(.top, 8)
-                
-                Text("Recent Transactions:")
-                    .font(Font.title.bold())
-                    .padding()
-                
-                ScrollView {
-                    
-                    VStack(alignment: .leading) {
-                        HStack {
-                            //this is an example
-                            Text("Transaction 1:")
-                                .font(Font.title2)
-                            
-                            Text("$\(budgetModel.userSpending, specifier: "%.2f")")
-                                .font(Font.title2)
-                            
-                            // add money transactions here i guess
-                            // this ui kinda sucks
+                HStack {
+                    Text("Recent Transactions:")
+                        .font(Font.title.bold())
+                        .padding()
+                    Button(action: {
+                        Task {
+                            await loadWithdrawals()
                         }
-                            .frame(width: 350, height: 100, alignment: .center)
-                            .background(Color.white)
-                            .cornerRadius(8)
-                            .shadow(radius: 3)
-                            .opacity(botOpacity)
-                            
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.title2)
+                    }
+                }
+
+                ScrollView {
+                   
+                    VStack(alignment: .leading, spacing: 16) {
+                        if (customer.account == nil) {
+                            Text("No account added")
+                        }
+                        else {
+                            if isLoading {
+                                ProgressView("Loading...")
+                            } else if withdrawals.isEmpty {
+                                Text("No withdrawals found.")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(withdrawals, id: \.withdrawalId) { withdrawal in
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Withdrawal ID: \(withdrawal.withdrawalId)")
+                                            .font(.headline)
+                                        Text("Amount: $\(withdrawal.amount, specifier: "%.2f")")
+                                        Text("Status: \(withdrawal.status.rawValue.capitalized)")
+                                        Text("Date: \(withdrawal.transactionDate ?? "N/A")")
+                                    }
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                    .task {
+                        await loadWithdrawals()
                     }
                 }
             }
@@ -216,7 +214,31 @@ struct BudgetView: View {
                     offsetY = offsetY > 200 ? 100 : UIScreen.main.bounds.height * 0.7
                 }
             }
-            
+            .onAppear {
+                scheduleDailyAtCertainTime(for: .current) {
+                    Task {
+                        if (await checkIfWithdrawalsExceededDailyMax()) {
+                            print("bad")
+                        }
+                        else {
+                            print("good")
+                        }
+                    }
+                }
+                Task {
+                    if (customer.customer != nil && customer.account != nil) {
+                        var withdrawals = await customer.getAllWithdrawalsFromAccount()
+                        if (withdrawals.count > 0) {
+                            var totalWithdrawals : Double = 0
+                            for withdrawal in withdrawals {
+                                totalWithdrawals += withdrawal.amount
+                            }
+                            userSpending = totalWithdrawals
+                        }
+                    }
+                    
+                }
+            }
             // this commented stuff is for dragging the thing up but lowk it feels weird
             // so it's click only now
 //            .gesture(
@@ -236,8 +258,65 @@ struct BudgetView: View {
 //                .animation(.easeInOut, value: offsetY)
         }
     }
+    
+    func checkIfWithdrawalsExceededDailyMax() async -> Bool {
+        withdrawals = await customer.getAllWithdrawalsFromAccount()
+        var totalWithdrawals : Double = 0
+        for withdrawal in withdrawals {
+            totalWithdrawals += withdrawal.amount
+        }
+        if (totalWithdrawals <= budgetModel.monthlyBudget / 30) {
+            return false
+        }
+        return true
+    }
+    
+    func loadWithdrawals() async {
+        if(customer.account == nil) {
+            
+        }
+        else { do {
+            if let result = try await withdrawalRequest.getWithdrawalsFromAccountId(customer.account!.accountId) {
+                withdrawals = result
+            }
+        } catch {
+            print("Failed to load withdrawals:", error)
+        }
+            isLoading = false
+        }
+    }
+}
+
+func scheduleDailyAtCertainTime(for timeZone: TimeZone = .current, action: @escaping () -> Void) {
+    let calendar = Calendar.current
+    let now = Date()
+
+    var calendarWithZone = calendar
+    calendarWithZone.timeZone = timeZone
+
+    var components = calendarWithZone.dateComponents([.year, .month, .day], from: now)
+    components.hour = 23
+    components.minute = 18
+    components.second = 0
+
+    guard let todayAtTen = calendarWithZone.date(from: components) else { return }
+
+    let nextRun = todayAtTen < now
+        ? calendarWithZone.date(byAdding: .day, value: 1, to: todayAtTen)!
+        : todayAtTen
+
+    let interval = nextRun.timeIntervalSinceNow
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
+        action()
+        scheduleDailyAtCertainTime(for: timeZone, action: action) // reschedule
+    }
 }
 
 #Preview {
     BudgetView()
+        .environmentObject(FossilCollection(fossils: sharedFossils))
+        .environmentObject(BudgetModel())
+        .environmentObject(CustomerStore())
 }
+

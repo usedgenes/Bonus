@@ -32,7 +32,9 @@ let sharedFossils: [Fossil] = [
 struct GameView: View {
     @Binding var selectedTab: Int
     @State private var foundFossil: Fossil? = nil
+    @State private var showInsufficientCoinsPopup = false
     @State private var isFlashing = false
+    @EnvironmentObject var coinManager: CoinManager
     @EnvironmentObject var fossilCollection: FossilCollection
     enum GameNavigation: Hashable {
         case collectionBook
@@ -50,7 +52,6 @@ struct GameView: View {
         let layout = Array(repeating: GridItem(.flexible(), spacing: 2), count: columns)
         NavigationStack(path: $navigationPath) {
             ZStack {
-                // Background grass image
                 Image("grassBackground")
                     .resizable()
                     .scaledToFill()
@@ -60,23 +61,18 @@ struct GameView: View {
                     Spacer()
                     
                     VStack(spacing: 4) {
-                        Text("Brachiosaurus Dig Site: \(completionPercentage())% complete")
+                        Text("Ceratosaurus Dig Site: \(completionPercentage())% complete")
                             .font(.title)
                             .bold()
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
-
-                        Text("Click to dig (costs 10🟡)")
+                        Text("Click to dig (costs 10🟡) | You have \(coinManager.coins)🟡")
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                             .frame(maxWidth: .infinity)
                             .padding(8)
                             .background(Color.black.opacity(0.7))
                             .opacity(isFlashing ? 1 : 1)
-                            .animation(
-                                Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true),
-                                value: isFlashing
-                            )
                     }
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
@@ -106,7 +102,7 @@ struct GameView: View {
                                             .scaledToFit()
                                             .frame(width: 40, height: 40)
                                     } else {
-                                        Image(fossil.picture) // fallback if the custom UIImage fails
+                                        Image(fossil.picture)
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 40, height: 40)
@@ -130,20 +126,11 @@ struct GameView: View {
                     .padding()
                     .background(Color.clear)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Button("Reset Grid") {
-                        resetGrid()
-                    }
-                    .padding()
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    
+                    .padding(.bottom, 50);
                     Spacer()
                 }
                 if let fossil = foundFossil {
                     ZStack {
-                        // Background overlay
                         Color.black.opacity(0.5)
                             .ignoresSafeArea()
                         
@@ -184,7 +171,43 @@ struct GameView: View {
                     .transition(.scale)
                     .zIndex(1)
                 }
+                if showInsufficientCoinsPopup {
+                    ZStack {
+                        Color.black.opacity(0.5)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 16) {
+                            Image(systemName: "xmark.octagon.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80, height: 80)
+                                .foregroundColor(.yellow)
+
+                            Text("Not Enough Coins")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+
+                            Text("You need at least 10 coins to dig.")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.8))
+
+                            Button("Close") {
+                                showInsufficientCoinsPopup = false
+                            }
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(10)
+                        }
+                        .padding()
+                        .background(Color.black.opacity(0.85))
+                        .cornerRadius(20)
+                        .padding()
+                    }
+                    .zIndex(2)
+                }
             }
+            
             .navigationDestination(for: GameNavigation.self) { destination in
                 switch destination {
                 case .collectionBook:
@@ -193,7 +216,10 @@ struct GameView: View {
             }
         }
         .onAppear {
-            if let savedGrid = GridStorage.load() {
+            if isFirstLaunch() {
+                setupGrid()
+                markAppAsLaunched()
+            } else if let savedGrid = GridStorage.load() {
                 grid = savedGrid
             } else {
                 setupGrid()
@@ -210,22 +236,16 @@ struct GameView: View {
     }
     
     func resetGrid() {
-        // Remove saved grid file
         GridStorage.clear()
 
-        // Reset fossils to all unfound
         for index in fossilCollection.fossils.indices {
             fossilCollection.fossils[index].found = false
         }
 
-        // Re-generate a new grid
         setupGrid()
     }
     func setupGrid() {
-        //Define unique fossils
         let fossils = sharedFossils
-
-        //Generate all positions in the grid
         let rows = 6
         
         let columns = 6
@@ -236,11 +256,9 @@ struct GameView: View {
             }
         }
 
-        //Shuffle fossils and positions
         let shuffledFossils = fossils.shuffled()
         let shuffledPositions = positions.shuffled()
 
-        //Create grid with fossils placed at random positions
         var newGrid: [[Plot]] = Array(
             repeating: Array(repeating: Plot(state: .untouched, fossil: nil), count: columns),
             count: rows
@@ -251,15 +269,21 @@ struct GameView: View {
             newGrid[pos.row][pos.col].fossil = shuffledFossils[i]
         }
 
-        //Set it as your current grid and save it
         grid = newGrid
         GridStorage.save(grid: grid)
     }
 
 
     func dig(atRow row: Int, col: Int) {
+        
         guard grid[row][col].state == .untouched else { return }
+        let digCost = 10
+        guard coinManager.coins >= digCost else {
+            showInsufficientCoinsPopup = true
+            return
+        }
 
+        coinManager.spendCoins(digCost)
         var plot = grid[row][col]
         plot.state = .dug
 
@@ -270,7 +294,6 @@ struct GameView: View {
             updatedFossil.found = true
             plot.fossil = updatedFossil
 
-            //Show popup with discovered fossil
             foundFossil = updatedFossil
         }
 
@@ -281,7 +304,6 @@ struct GameView: View {
         GridStorage.save(grid: grid)
 
         if fossilCollection.foundCount == sharedFossils.count {
-            // Automatically dig all remaining untouched plots
             for r in 0..<rows {
                 for c in 0..<columns {
                     if grid[r][c].state == .untouched {
@@ -290,25 +312,20 @@ struct GameView: View {
                 }
             }
 
-            // Save updated grid after auto-digging
             GridStorage.save(grid: grid)
 
             foundFossil = nil
-            
-            selectedTab = 0 // Go to CollectionBook
+            selectedTab = 0
         }
     }
 }
 
-func color(for state: PlotState) -> Color {
-    switch state {
-    case .untouched:
-        return .brown
-    case .dug:
-        return .gray
-    case .foundItem(let item):
-        return item == "Bone" ? .white : .yellow
-    }
+func isFirstLaunch() -> Bool {
+    return !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+}
+
+func markAppAsLaunched() {
+    UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
 }
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {

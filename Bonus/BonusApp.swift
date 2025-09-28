@@ -12,6 +12,7 @@ import Combine
 struct BonusApp: App {
     @StateObject var customer = CustomerStore()
     @StateObject var budgetModel = BudgetModel()
+    @StateObject private var coinManager = CoinManager()
     @StateObject private var fossilCollection = FossilCollection(fossils: sharedFossils)
     
     var body: some Scene {
@@ -20,6 +21,7 @@ struct BonusApp: App {
                 .environmentObject(fossilCollection)
                 .environmentObject(budgetModel)
                 .environmentObject(customer)
+                .environmentObject(coinManager)
         }
     }
 }
