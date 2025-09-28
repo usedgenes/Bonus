@@ -15,32 +15,32 @@ class BudgetModel: ObservableObject {
     @Published var userCoins: Int = UserDefaults.standard.integer(forKey: "userCoins")
     @Published var userSpending: Double = 0.0
     
-    init() {
-        refreshUserCoinsIfNeeded()
-    }
-    
-    // Call this to manually update userCoins at 8PM
-    func refreshUserCoinsIfNeeded() {
-        let now = Date()
-        let calendar = Calendar.current
-        let lastUpdate = UserDefaults.standard.object(forKey: "lastUserCoinsUpdate") as? Date ?? Date.distantPast
-        
-        // Check if it's a new day AND past 8PM
-        guard !calendar.isDateInToday(lastUpdate) else { return }
-        guard let eightPM = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: now) else { return };
-        guard now >= eightPM else { return }
-        
-        let dailyMax = monthlyBudget / 30
-        let earned = max(dailyMax - userSpending, 0)
-        let coinsToAdd = Int(earned * 0.1)
-        
-        userCoins += coinsToAdd
-        self.userSpending = 0.0
-            
-        // Save to persistent storage
-        UserDefaults.standard.set(userCoins, forKey: "userCoins")
-        UserDefaults.standard.set(Date(), forKey: "lastUserCoinsUpdate")
-        }
+//    init() {
+//        refreshUserCoinsIfNeeded()
+//    }
+//    
+//    // Call this to manually update userCoins at 8PM
+//    func refreshUserCoinsIfNeeded() {
+//        let now = Date()
+//        let calendar = Calendar.current
+//        let lastUpdate = UserDefaults.standard.object(forKey: "lastUserCoinsUpdate") as? Date ?? Date.distantPast
+//        
+//        // Check if it's a new day AND past 8PM
+//        guard !calendar.isDateInToday(lastUpdate) else { return }
+//        guard let eightPM = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: now) else { return };
+//        guard now >= eightPM else { return }
+//        
+//        let dailyMax = monthlyBudget / 30
+//        let earned = max(dailyMax - userSpending, 0)
+//        let coinsToAdd = Int(earned * 0.1)
+//        
+//        userCoins += coinsToAdd
+//        self.userSpending = 0.0
+//            
+//        // Save to persistent storage
+//        UserDefaults.standard.set(userCoins, forKey: "userCoins")
+//        UserDefaults.standard.set(Date(), forKey: "lastUserCoinsUpdate")
+//        }
 }
 
 
