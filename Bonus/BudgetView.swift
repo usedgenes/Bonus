@@ -152,6 +152,7 @@ struct BudgetView: View {
                     Task {
                         if (await !checkIfWithdrawalsExceededDailyMax()) {
                             coinManager.addCoins(100)
+                            print("adding")
                         }
                     }
                 } label: {
@@ -160,6 +161,8 @@ struct BudgetView: View {
                         .frame(maxWidth: 300, minHeight: 20)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.white)
+
                 Button {
                     coinManager.resetCoins()
                 } label: {
@@ -168,7 +171,7 @@ struct BudgetView: View {
                         .frame(maxWidth: 300, minHeight: 20)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.red)
+                .tint(.white)
                 
             }
             .scaleEffect(topScale)

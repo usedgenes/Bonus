@@ -49,6 +49,7 @@ struct SettingsView: View {
                 
                 VStack(spacing: 0) {
                     Button {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         if let amount = Double(transactionAmount) {
                             Task {
                                 await customer.postWithdrawal(medium: TransactionMedium.Balance, amount: amount)
