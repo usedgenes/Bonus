@@ -12,10 +12,37 @@ import Combine
 
 class BudgetModel: ObservableObject {
     @Published var monthlyBudget: Double = 3000.0
+    @Published var userCoins: Int = UserDefaults.standard.integer(forKey: "userCoins")
+    @Published var userSpending: Double = 0.0
+    
+    init() {
+        refreshUserCoinsIfNeeded()
+    }
+    
+    // Call this to manually update userCoins at 8PM
+    func refreshUserCoinsIfNeeded() {
+        let now = Date()
+        let calendar = Calendar.current
+        let lastUpdate = UserDefaults.standard.object(forKey: "lastUserCoinsUpdate") as? Date ?? Date.distantPast
+        
+        // Check if it's a new day AND past 8PM
+        guard !calendar.isDateInToday(lastUpdate) else { return }
+        guard let eightPM = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: now) else { return };
+        guard now >= eightPM else { return }
+        
+        let dailyMax = monthlyBudget / 30
+        let earned = max(dailyMax - userSpending, 0)
+        let coinsToAdd = Int(earned * 0.1)
+        
+        userCoins += coinsToAdd
+        self.userSpending = 0.0
+            
+        // Save to persistent storage
+        UserDefaults.standard.set(userCoins, forKey: "userCoins")
+        UserDefaults.standard.set(Date(), forKey: "lastUserCoinsUpdate")
+        }
 }
 
-// @ 8 pm daily
-// userCoins += Int((BudgetModel.monthlyBudget / 30 - userSpending) * 0.1)
 
 struct PieMeterView: View {
     @EnvironmentObject var budgetModel: BudgetModel
@@ -34,7 +61,7 @@ struct PieMeterView: View {
     }
     
     var amountLeft: Double {
-        budgetModel.monthlyBudget / 30.0 - userSpending
+        budgetModel.monthlyBudget / 30.0 - budgetModel.userSpending
     }
     
     var body: some View {
@@ -65,9 +92,6 @@ struct PieMeterView: View {
         .frame(width: 200, height: 200)
     }
 }
-
-//var monthlyBudget = 3000.0
-var userSpending = 90.0
 
 struct BudgetView: View {
     @State private var offsetY: CGFloat = UIScreen.main.bounds.height * 0.725
@@ -111,13 +135,14 @@ struct BudgetView: View {
                 .ignoresSafeArea()
             
             VStack {
+                Text("Coins: \(budgetModel.userCoins)")
                 Text("Today's Remaining Money:")
                     .font(.title)
                     .bold()
                     .padding(.top, 125)
                 
                 if budgetModel.monthlyBudget != 0 {
-                    PieMeterView(percentage: 1 - (userSpending / (budgetModel.monthlyBudget / 30)))
+                    PieMeterView(percentage: 1 - (budgetModel.userSpending / (budgetModel.monthlyBudget / 30)))
                         .padding(.top, 30)
                         .opacity(topOpacity)
                         .environmentObject(budgetModel)
@@ -140,7 +165,7 @@ struct BudgetView: View {
                     VStack(alignment: .trailing) {
                         Text("Money Spent Today:")
                             .font(.title3)
-                        Text("$\(userSpending, specifier: "%.2f")")
+                        Text("$\(budgetModel.userSpending, specifier: "%.2f")")
                             .font(.title2)
                             .bold()
                     }
@@ -158,51 +183,31 @@ struct BudgetView: View {
                     .frame(width: 40, height: 6)
                     .foregroundColor(.gray)
                     .padding(.top, 8)
-                HStack {
-                    Text("Recent Transactions:")
-                        .font(Font.title.bold())
-                        .padding()
-                    Button(action: {
-                        Task {
-                            await loadWithdrawals()
-                        }
-                    }) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.title2)
-                    }
-                }
-
-                ScrollView {
-                   
-                    VStack(alignment: .leading, spacing: 16) {
-                        if (customer.account == nil) {
-                            Text("No account added")
-                        }
-                        else {
-                            if isLoading {
-                                ProgressView("Loading...")
-                            } else if withdrawals.isEmpty {
-                                Text("No withdrawals found.")
-                                    .foregroundColor(.gray)
-                            } else {
-                                ForEach(withdrawals, id: \.withdrawalId) { withdrawal in
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Withdrawal ID: \(withdrawal.withdrawalId)")
-                                            .font(.headline)
-                                        Text("Amount: $\(withdrawal.amount, specifier: "%.2f")")
-                                        Text("Status: \(withdrawal.status.rawValue.capitalized)")
-                                        Text("Date: \(withdrawal.transactionDate ?? "N/A")")
-                                    }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                }
-                            }
-                        }
-                    }
+                
+                Text("Recent Transactions:")
+                    .font(Font.title.bold())
                     .padding()
-                    .task {
-                        await loadWithdrawals()
+                
+                ScrollView {
+                    
+                    VStack(alignment: .leading) {
+                        HStack {
+                            //this is an example
+                            Text("Transaction 1:")
+                                .font(Font.title2)
+                            
+                            Text("$\(budgetModel.userSpending, specifier: "%.2f")")
+                                .font(Font.title2)
+                            
+                            // add money transactions here i guess
+                            // this ui kinda sucks
+                        }
+                            .frame(width: 350, height: 100, alignment: .center)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .shadow(radius: 3)
+                            .opacity(botOpacity)
+                            
                     }
                 }
             }
@@ -234,21 +239,6 @@ struct BudgetView: View {
 //                        }
 //                )
 //                .animation(.easeInOut, value: offsetY)
-        }
-    }
-    
-    func loadWithdrawals() async {
-        if(customer.account == nil) {
-            
-        }
-        else { do {
-            if let result = try await withdrawalRequest.getWithdrawalsFromAccountId(customer.account!.accountId) {
-                withdrawals = result
-            }
-        } catch {
-            print("Failed to load withdrawals:", error)
-        }
-            isLoading = false
         }
     }
 }
