@@ -255,26 +255,8 @@ struct BudgetView: View {
                             userSpending = totalWithdrawals
                         }
                     }
-                    
                 }
             }
-            // this commented stuff is for dragging the thing up but lowk it feels weird
-            // so it's click only now
-//            .gesture(
-//                DragGesture()
-//                    .updating($dragOffset) { value, state, _ in
-//                        state = value.translation.height
-//                    }
-//                    .onEnded { value in
-//                        // Snap to top or bottom depending on drag
-//                        let newOffset = offsetY + value.translation.height
-//                        let middle = UIScreen.main.bounds.height * 0.7
-//                        withAnimation(.easeInOut) {
-//                            offsetY = newOffset < middle ? 100 : UIScreen.main.bounds.height * 0.7
-//                            }
-//                        }
-//                )
-//                .animation(.easeInOut, value: offsetY)
         }
     }
     

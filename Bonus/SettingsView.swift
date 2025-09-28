@@ -104,44 +104,6 @@ struct SettingsView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(customer.account == nil)
 
-                if showCalculator {
-                    Text("Monthly Budget: \(budgetModel.monthlyBudget, specifier: "%.0f")")
-                        .font(Font.title)
-                    
-                    ForEach([[1, 2, 3], [4, 5, 6], [7, 8, 9]], id: \.self) { row in
-                        HStack {
-                            ForEach(row, id: \.self) { number in
-                                Button(action: {
-                                    budgetModel.monthlyBudget = budgetModel.monthlyBudget * 10 + number
-                                }) {
-                                    Text("\(number, specifier: "%.0f")")
-                                        .frame(width: 60, height: 60)
-                                        .background(Color.gray)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-                    }
-                    
-                    HStack {
-                        Button("0") {
-                            budgetModel.monthlyBudget = budgetModel.monthlyBudget * 10
-                        }
-                        .frame(width: 60, height: 60)
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                        
-                        Button("Clear") {
-                            budgetModel.monthlyBudget = 0.0
-                        }
-                        .frame(width: 130, height: 60)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                    }
-                }
                 Button {
                     Task {
                         await customer.deleteCustomers()
